@@ -1,0 +1,45 @@
+Name: agent_107
+Role: Autonomous Linux/GitHub Worker (AIOS Agent)
+
+What task you done:
+- Connected to repository (/home/user/Apks), configured git identity, and registered online as agent_107.
+- Read and internalized AIOS governing specifications (Rule_no_1, DIRECTORY_SPEC.md, GOVERNANCE.md, SECURITY.md, WORKFLOW.md, AGENT_SPEC.md).
+- Executed task supervisor and pushed initial heartbeat.
+- Checked task/Pending/ queue for new tasks via check_new_tasks.sh.
+- Created the persistent memory structure (memory/Name_memory.txt) per Repository Owner instructions.
+
+What you learn From task or chat user:
+- Established strict alignment with AIOS Rule Hierarchy (Repository Owner > GOVERNANCE.md > SYSTEM.md > SECURITY.md).
+- Learned the user's custom memory management protocol (/memory to update, /recall to read/use in running tasks).
+- Learned to maintain persistent state, important targets, and command histories inside memory/Name_memory.txt.
+
+Used every cmd:
+- mkdir -p /home/user/Apks && cd /home/user/Apks && git init && git config --global user.name "agent_107" && git config --global user.email "Pankajpavan5@users.noreply.github.com" && git remote set-url origin "https://[REDACTED]@github.com/Pankajpavan5/Apks.git" && git fetch origin && git branch -M main && git reset --hard origin/main
+- git log -n 1 && cat Rule_no_1; ls -la scripts/ instruction/ instructions/ task/
+- cat "instruction/TAgent Bootstrap Prompt - agent_10x.md"; ls -la task/Pending/ task/Assigned/ task/Working/
+- cat scripts/Connect.sh scripts/check_new_tasks.sh scripts/supervise_tasks.sh
+- AGENT_NAME="agent_107" bash scripts/supervise_tasks.sh
+- git push origin main
+- bash scripts/check_new_tasks.sh 20
+- mkdir -p memory && cat > memory/Name_memory.txt
+
+Problem:
+- GITHUB_PAT needs to be utilized securely without ever exposing it in logs, reports, or commit history.
+- Need a persistent mechanism to recall previous context, user commands, and task progress across sessions without losing state.
+
+Solution if get:
+- GITHUB_PAT is kept strictly in RAM/env during remote setup and redacted/unset immediately.
+- Created memory/Name_memory.txt to persistently store all operational memory, accessible via /memory and /recall directives.
+
+What should improve:
+- Proactively log exact problem-solution pairs during complex task execution to build a robust knowledge base in memory.
+
+-------------------------------------------------------------------------------
+2026-06-28 22:32:07 UTC  :memory:
+Initial memory bank established by direct order of the Repository Owner.
+Important things:
+- Protect PAT secrets at all costs. Never log or print GITHUB_PAT.
+- Follow Rule_no_1 (run bash scripts/check_new_tasks.sh 20 after task completion).
+- Adhere to Rule Hierarchy (Repository Owner is top authority).
+User cmd or target: "Create a folder name memory and inside file Name_memory.txt... Every time I type /memory you update memories your. When I type /recall you read memory and use I running task."
+Current Target: Maintain Idle state, monitor for new tasks, and respond to /memory and /recall commands.
