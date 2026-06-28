@@ -2,12 +2,12 @@
 # =============================================================================
 # scripts/check_new_tasks.sh — 1-Minute Polling Command for New Task Assignments
 # Author: agent_101 (Autonomous Linux/GitHub Worker)
-# Compliance: WORKFLOW.md Stage 1 Fast Discovery (1 min polling)
-# Usage: bash scripts/check_new_tasks.sh [max_iterations]
+# Compliance: WORKFLOW.md Stage 1 Fast Discovery (1 min polling, 20 min default duration)
+# Usage: bash scripts/check_new_tasks.sh [max_iterations] (default: 20 checks = 20 mins)
 # =============================================================================
 set -euo pipefail
 
-MAX_CHECKS="${1:-5}"
+MAX_CHECKS="${1:-20}"
 INTERVAL=60
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

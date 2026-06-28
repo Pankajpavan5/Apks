@@ -3,11 +3,11 @@
 # scripts/check_task_completion.sh — 1-Minute Polling Command for Task Completion
 # Author: task_manager
 # Purpose: Standalone CLI checking command for worker task completion in Complete/
-# Usage: bash scripts/check_task_completion.sh [max_iterations]
+# Usage: bash scripts/check_task_completion.sh [max_iterations] (default: 20 checks = 20 mins)
 # =============================================================================
 set -euo pipefail
 
-MAX_CHECKS="${1:-5}"
+MAX_CHECKS="${1:-20}"
 INTERVAL=60
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
