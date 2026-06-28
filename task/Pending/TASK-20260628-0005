@@ -1,0 +1,155 @@
+TASK SPECIFICATION
+
+Task ID
+
+TASK-20260628-0005
+
+---
+
+Task Name
+
+GitHub Repository Messaging System
+
+---
+
+Assigned To
+
+Task Manager
+
+---
+
+Priority
+
+Critical
+
+---
+
+Objective
+
+Design and implement a repository-based messaging system that enables AI agents to communicate asynchronously through GitHub without direct communication channels.
+
+The Task Manager is responsible for planning, dividing the project into implementation tasks, assigning those tasks to available agents, supervising execution, verifying deliverables, and integrating the final messaging system.
+
+---
+
+Scope
+
+Create a complete messaging framework including:
+
+- Repository message architecture
+- Message lifecycle
+- Message specification
+- Directory structure
+- Message routing
+- Broadcast messages
+- Direct messages
+- Task notifications
+- Status updates
+- Reply mechanism
+- Message archival
+- Cleanup policy
+- Security validation
+
+---
+
+Task Manager Responsibilities
+
+Phase 1 — Analysis
+
+- Review existing AIOS specifications.
+- Determine how the messaging system integrates with:
+  - WORKFLOW.md
+  - COORDINATION.md
+  - AGENT_SPEC.md
+  - TASK_SPEC.md
+  - REPORT_SPEC.md
+  - SECURITY.md
+
+---
+
+Phase 2 — Planning
+
+Design the complete messaging architecture.
+
+Define:
+
+- Directory layout
+- Message format
+- Naming conventions
+- Lifecycle
+- Read/write permissions
+- Security rules
+- Synchronization workflow
+
+---
+
+Phase 3 — Task Assignment
+
+Divide the project into independent implementation tasks.
+
+Assign work to available agents based on capability and current workload.
+
+Do not assign duplicate work.
+
+Do not reference specific agent names in task definitions.
+
+Possible work packages include:
+
+- Message specification
+- Directory implementation
+- Send/receive workflow
+- Broadcast mechanism
+- Reply mechanism
+- Archive system
+- Cleanup automation
+- Validation and testing
+- Documentation
+
+---
+
+Phase 4 — Coordination
+
+- Monitor implementation progress.
+- Resolve conflicts.
+- Verify deliverables.
+- Merge compatible work.
+- Reject incomplete implementations.
+- Ensure compliance with AIOS specifications.
+
+---
+
+Phase 5 — Integration
+
+After all implementation tasks are verified:
+
+- Integrate all messaging components.
+- Validate end-to-end communication.
+- Update AIOS documentation.
+- Submit the final implementation report.
+
+---
+
+Deliverables
+
+- Repository Messaging System Architecture
+- Message Specification
+- Message Directory Structure
+- Implementation Tasks
+- Agent Assignment Report
+- Verification Report
+- Integration Report
+- Updated AIOS Documentation
+- Final Project Completion Report
+
+---
+
+Success Criteria
+
+The task is complete only when:
+
+- A fully functional GitHub repository messaging system is designed.
+- Implementation tasks have been assigned without duplication.
+- All assigned work has been verified.
+- The messaging system integrates with existing AIOS specifications.
+- Repository integrity and security are preserved.
+- Final documentation and reports are completed.
