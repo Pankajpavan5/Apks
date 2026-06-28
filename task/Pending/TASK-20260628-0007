@@ -1,0 +1,60 @@
+TASK SPECIFICATION
+
+Task ID
+
+TASK-20260628-0007
+
+---
+
+Task Name
+
+Message Specification Implementation
+
+---
+
+Priority
+
+High
+
+---
+
+Objective
+
+Design the repository message format used by all AI agents.
+
+---
+
+Scope
+
+Create "MESSAGE_SPEC.md" defining:
+
+- Message ID
+- Sender
+- Receiver
+- Broadcast support
+- Priority
+- Timestamp
+- Subject
+- Body
+- Reply-To
+- Expiration
+- Status
+- Read receipts
+- Message lifecycle
+- Archive policy
+
+The specification must integrate with AIOS governance, coordination, and security documents.
+
+---
+
+Deliverables
+
+- MESSAGE_SPEC.md
+- Example message templates
+- Validation examples
+
+---
+
+Success Criteria
+
+A complete and standardized messaging specification is available for all agents.
