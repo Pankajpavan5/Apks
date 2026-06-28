@@ -134,6 +134,93 @@ print("Authenticated Request Status:", response.status_code)
 
 ---
 
+## Using the PAT Without Manual Decryption
+
+You do **not** need to extract or print the plaintext PAT to use it. The vault is designed so that the decrypted token stays inside the vault wrapper and is only attached to outgoing HTTP headers. This section shows common patterns for consuming the PAT safely.
+
+### 1. GitHub API call (GET /user)
+
+```python
+from pat_vault.src.github_pat_vault import GitHubPATVault
+import requests
+
+vault = GitHubPATVault("/home/user/.pat_vault/records.json")
+
+with vault.get_github_auth_header("user_github_pat") as headers:
+    # headers already contains Authorization: token <PAT>
+    response = requests.get("https://api.github.com/user", headers=headers)
+    print(response.status_code)
+    print(response.json()["login"])
+```
+
+### 2. List repositories for the authenticated user
+
+```python
+with vault.get_github_auth_header("user_github_pat") as headers:
+    response = requests.get(
+        "https://api.github.com/user/repos?per_page=100",
+        headers=headers
+    )
+    for repo in response.json():
+        print(repo["full_name"])
+```
+
+### 3. Create an issue without exposing the PAT
+
+```python
+with vault.get_github_auth_header("user_github_pat") as headers:
+    response = requests.post(
+        "https://api.github.com/repos/OWNER/REPO/issues",
+        headers=headers,
+        json={"title": "Issue title", "body": "Issue body"}
+    )
+    print(response.status_code)
+```
+
+### 4. Clone or push a repository without embedding the PAT in the URL
+
+Use the `Authorization` header only when calling the GitHub API. For `git clone`/`git push` operations, prefer using a git credential helper or an in-memory helper so the remote URL never contains the token.
+
+```python
+import subprocess
+from pat_vault.src.github_pat_vault import GitHubPATVault
+
+vault = GitHubPATVault("/home/user/.pat_vault/records.json")
+
+with vault.get_github_auth_header("user_github_pat") as headers:
+    token = headers["Authorization"].replace("token ", "")
+    # Use a short-lived credential helper
+    subprocess.run(
+        ["git", "clone", "https://github.com/OWNER/REPO.git", "/tmp/repo"],
+        env={**dict(subprocess.os.environ), "GIT_ASKPASS": "echo", "GIT_USERNAME": token, "GIT_PASSWORD": "x-oauth-basic"},
+        check=True
+    )
+```
+
+> **Note:** The snippet above is for demonstration. In production, prefer `git credential` with a helper that stores the token in memory only.
+
+### 5. Shell usage via environment variable
+
+If you are invoking a CLI tool that reads the PAT from an environment variable, let the vault populate it for a single command:
+
+```python
+import subprocess
+from pat_vault.src.github_pat_vault import GitHubPATVault
+
+vault = GitHubPATVault("/home/user/.pat_vault/records.json")
+
+with vault.get_github_auth_header("user_github_pat") as headers:
+    token = headers["Authorization"].replace("token ", "")
+    env = {**dict(subprocess.os.environ), "GITHUB_TOKEN": token}
+    subprocess.run(["gh", "api", "user"], env=env, check=True)
+```
+
+### Key rule
+
+> **Never assign the decrypted PAT to a long-lived variable, print it, or write it to disk.** Always keep it inside the `with vault.get_github_auth_header(...) as headers:` block.
+
+---
+
 ## Security Best Practices
 
 1. **Never store plaintext PATs in the repository.** Only the encrypted ciphertext and metadata should be committed.
