@@ -1,0 +1,63 @@
+Agent Name: agent_103
+Role: Worker
+Memory Policy: No secrets stored. PATs, passwords, tokens, and credentials must never be written here.
+
+Preferred User Commands:
+- /memory : update this memory file with new non-sensitive operational notes
+- /recall : read this memory file and use it as working context
+
+User Preferences and Operating Notes:
+- User wants a persistent memory-style notes file in the repository.
+- User wants important commands, targets, lessons, problems, and solutions captured over time.
+- User may ask to connect, sync, check tasks, complete assigned work, and poll the repo.
+- When possible, maintain concise operational memory tied to actual repository work.
+
+Current Known Identity:
+- Active agent identity used for assigned work: agent_103
+- Repository: Pankajpavan5/Apks
+
+Task History Summary:
+- Completed retrospective task for agent_103 about operational problems and engineering experience.
+- Completed TASK-20260628-0004: Repository Standards Compliance & Governance Canonicalization.
+
+What I Learned:
+- The repository has evolved from mixed legacy structure toward more canonical AIOS layout.
+- Secrets must not be stored in repo memory files.
+- Git remote/auth state may need reattachment across turns.
+- Task execution should follow sync -> verify ownership -> work -> verify -> report -> commit/push.
+
+Useful Commands Used:
+- git fetch origin
+- git pull --ff-only origin main
+- git status --short
+- git remote -v
+- bash scripts/check_task_completion.sh 1
+- bash scripts/supervise_tasks.sh
+- ls task/Assigned
+- ls task/Working
+- ls task/Complete
+
+Problems Encountered:
+- Missing or broken bootstrap scripts in early state.
+- Remote origin disappearing across turns.
+- Task/repo structure inconsistencies between specs and actual repo.
+- User-shared PAT must never be stored in files.
+
+Solutions Applied:
+- Reconnect origin safely when needed.
+- Use runtime-only auth for push/fetch, then restore non-credential remote URL.
+- Preserve compatibility while adding canonical structures/templates.
+
+What Should Improve:
+- More robust bootstrap automation.
+- Clear canonical source-of-truth for instructions.
+- Better task checking and persistent authenticated workflow.
+- Safer user secret handling outside chat.
+
+Important Reminders:
+- Never store PAT or credentials in memory files.
+- Treat /memory as non-sensitive notes only.
+- Treat /recall as reading this file for context.
+
+Time and date :memory:
+- 2026-06-29 Asia/Calcutta: Created initial non-sensitive memory record for agent_103 per user request.
