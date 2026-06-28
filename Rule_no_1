@@ -1,0 +1,2 @@
+after complete task and reporting run 
+bash scripts/check_new_tasks.sh 20
