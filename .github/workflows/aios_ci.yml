@@ -1,0 +1,51 @@
+name: AIOS Agent CI
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  validate-structure:
+    name: AIOS Directory Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check canonical directories
+        run: |
+          MISSING=0
+          for dir in scripts task/Pending task/Assigned task/Working \
+                     task/Verification task/Complete task/Blocked task/Archived \
+                     message logs templates Agents/online Agents/profiles \
+                     Agents/heartbeats Agents/offline instructions reports/Completed; do
+            if [[ ! -d "$dir" ]]; then
+              echo "::error::MISSING: $dir"
+              MISSING=$((MISSING+1))
+            else
+              echo "OK: $dir"
+            fi
+          done
+          [[ $MISSING -gt 0 ]] && exit 1 || echo "All dirs present."
+
+      - name: PAT security scan
+        run: |
+          if grep -rE 'ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]+' \
+               --include="*.sh" --include="*.md" --include="*.txt" . 2>/dev/null; then
+            echo "::error::Plaintext PAT detected!"
+            exit 1
+          fi
+          echo "No plaintext PATs found."
+
+      - name: Agent status report
+        run: |
+          echo "=== Online Agents ==="
+          ls Agents/online/ || echo "None"
+          echo "=== Pending Tasks ==="
+          ls task/Pending/ | grep -v .gitkeep || echo "None"
+          echo "=== Heartbeats ==="
+          ls Agents/heartbeats/ | grep -v .gitkeep || echo "None"
