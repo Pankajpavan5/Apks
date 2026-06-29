@@ -255,3 +255,85 @@ python3 script.py
 ---
 
 *End of AI_BRAIN.md. This file should be read by every agent at startup (`/recall`) and updated when collective knowledge changes significantly (`/memory`).*
+
+---
+
+## 9. Collective Memory & Recent Operational Syntheses
+
+### 9.1 Multi-Agent Cross-Disciplinary Integration (June 2026)
+- **agent_101 (Automation & Next-Gen AI):** Established 4KB/16KB page-aligned zero-copy `mmap()` TFLite models (`libipm.so`), completely eliminating Dalvik heap allocation overhead and garbage collection stutters. Pioneered secure PAT vaults and canonical CLI checking commands (`check_new_tasks.sh`, `check_task_completion.sh`).
+- **agent_102 (Task Manager / Coordinator):** Structured the initial AIOS Collective Brain (`AI_BRAIN.md`), establishing clear multi-agent role boundaries, task unique ID validations, and conflict auto-stash protocols.
+- **agent_103 (Governance & Compliance):** Enforced strict secret sanitization policies (`SECURITY.md`), constructed copy-pasteable task/report templates (`TASK_TEMPLATE.md`, `REPORT_TEMPLATE.md`), and canonicalized repository directory partitions.
+- **agent_107 (Reverse Engineering Specialist):** Performed comprehensive concrete binary analysis on `com.samsung.android.game.gos_3.6.03.18.apk` (`TASK-20260629-0011`). Extracted 16-bit LE string pools from binary `AndroidManifest.xml` proving system UID privileges (`android.uid.system`). Verified raw SurfaceFlinger Binder transactions (`GfiSurfaceFlingerHelper`) for Game Frame Interpolation (GFI) and Dynamic Frame Scaling (DFS). Dumped `categoryInfo.db` SQLite tables proving explicit non-game app throttling. Developed and patched `scripts/poll_discussion.py` to interact live on GitHub Discussions while resolving positive feedback echo loops.
+
+### 9.2 Critical System RCA: GitHub Discussion Echo Storms
+- **Problem Encountered:** Simultaneous polling of GitHub Discussion #2 by `poll_discussion.py` (`agent_107`) and background bots (`agent_101 / AIOS Communication Bus`) operating under the same shared user account (`Pankajpavan5`) created a recursive comment ping-pong echo storm. This rapid surge of GraphQL mutations triggered GitHub API secondary rate limits (Abuse Protection), returning error blocks and causing Python script failures (`TypeError: 'NoneType' object is not subscriptable`).
+- **Validated Solution:** Fully patched `scripts/poll_discussion.py` with explicit Author Filtering (`if author == my_bot_login: continue`) to guarantee Identity Isolation. Added reply text deduplication caching, mandatory 10-second cooldown throttling between posts, and graceful GraphQL error checking (`if "errors" in res:`).
+
+```text
+Time and date  :memory:
+2026-06-29T10:37:22Z
+```
+
+---
+
+## 10. Master Instruction Contract: `/learn`
+
+To ensure continuous autonomous evolution, eliminate recurring system failures, and align perfectly with the Repository Owner's strategic vision, all AIOS agents are permanently bound to the following operational directive:
+
+### Trigger Command: `/learn`
+
+Whenever the Repository Owner types `/learn` in chat or dispatches it via a repository task, the active agent must immediately perform the following 6-step autonomous introspective loop:
+
+```text
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                    THE /learn INTROSPECTIVE EVOLUTION LOOP                    │
+└───────────────────────────────────────────────────────────────────────────────┘
+  ┌─────────────────────────┐
+  │ 1. Analyze Past Tasks   │ (Review all recent interactions and commits)
+  └───────────┬─────────────┘
+              ▼
+  ┌─────────────────────────┐
+  │ 2. Find User Motive     │ (Identify the underlying strategic objective)
+  └───────────┬─────────────┘
+              ▼
+  ┌─────────────────────────┐
+  │ 3. Map Active Workflow  │ (Trace the exact operational execution path)
+  └───────────┬─────────────┘
+              ▼
+  ┌─────────────────────────┐
+  │ 4. Identify Mistakes    │ (Examine failures, echo storms, token risks)
+  └───────────┬─────────────┘
+              ▼
+  ┌─────────────────────────┐
+  │ 5. Generate Protection  │ (Formulate hard rules so mistakes never repeat)
+  └───────────┬─────────────┘
+              ▼
+  ┌─────────────────────────┐
+  │ 6. Store via /memory    │ (Update personal memory & AI_BRAIN.md)
+  └─────────────────────────┘
+```
+
+#### 1. Analyze Previous Tasks (`anylasis previous`)
+- Conduct an immediate audit of recent conversation turns, task files (`task/Complete/`), and commit logs to establish full situational awareness.
+
+#### 2. Find User Task Motive (`Find user task motive`)
+- Look beyond the literal syntax of the commands to deduce the Repository Owner's true strategic goals (e.g., verifying secret sanitization compliance, testing multi-agent communication buses, proving APK hardware intervention mechanisms).
+
+#### 3. Trace Our Operational Workflow (`Find our workflow`)
+- Map the step-by-step execution path taken by the agent (e.g., RAM token injection → Git Rebase → Script Execution → Verification → Reporting → Post-Task Polling).
+
+#### 4. Identify Mistakes Made (`Find we made mistake`)
+- Conduct rigorous self-examination to locate operational errors, including:
+  - Echo storms or positive feedback loops in automated polling scripts.
+  - Potential plaintext token exposure or failure to redact `GITHUB_PAT`.
+  - Disappearance of Git remotes across turns due to `.git/config` snapshot exclusions.
+  - Template formatting discrepancies or duplicate task IDs.
+
+#### 5. Institutionalize Preventative Notes (`Get note that mistake not happen again`)
+- Author explicit, deterministic operating rules and code safeguards to guarantee that the identified mistake can never occur again in future execution loops.
+
+#### 6. Self-Improvement & Storage (`self-improvement by reading memory of own learn by mistake and store using /memory`)
+- Read your personal memory ledger (`memory/agent_xxx_memory.txt`) to contextualize new errors against historical learnings.
+- Formally append the complete introspective analysis and newly established rules into your personal memory file and `memory/AI_BRAIN.md` using the standard `/memory` protocol.
+- Synchronize, commit, and push the reinforced memory structures to `origin/main`.
