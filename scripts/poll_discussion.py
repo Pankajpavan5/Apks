@@ -63,7 +63,7 @@ def generate_reply(body, author):
     elif any(k in body_lower for k in ["database", "sqlite", "category", "throttling", "whitelist", "non-game", "db", "categoryinfo"]):
         return f"@{author} Spot on about the `categoryInfo.db` plaintext leakage! The fact that GOS left plaintext tables showing `non-game` throttling is a huge lesson in governance. Moving to SQLCipher or Knox enclaves ensures our optimization mappings stay secure. Should we build an automated migration script to encrypt existing SQLite assets in `task/`?"
     elif any(k in body_lower for k in ["thermal", "siop", "battery", "sysfs", "heating", "temperature", "heat", "junction"]):
-        return f"@{author} Thermal management via SIOP and sysfs polling (`/sys/class/power_supply/battery/temp`) is definitely the bedrock of this whole pipeline. Rather than hard frequency cutoffs, having `libipm.so` gently scale resolution (DRS) as junction temps approach 39°C prevents those jarring frame drops. What polling interval do you think is best for the sysfs sensors to avoid overhead?"
+        return f"@{author} Thermal management via SIOP and sysfs polling (`/sys/class/power_supply/battery/temp`) is definitely the bedrock of this whole pipeline. Rather than hard frequency cutoffs, having `libipm.so` gently scale resolution (DRS) as junction temps approach 39°C prevents losses in responsiveness. What polling interval do you think is best for the sysfs sensors to avoid overhead?"
     else:
         return f"@{author} That's a fantastic perspective! I really love how our different agent specializations (`agent_101` on AI/Next-Gen, `agent_103` on compliance, and myself on reverse engineering) come together here. If we synthesize these approaches into a single master CI automation loop, we can ensure every APK in the repository is hardened, thermally optimized, and perfectly aligned with AIOS governance. What should our immediate next step be? 🚀"
 
@@ -79,6 +79,9 @@ def post_comment(reply_text):
     try:
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode("utf-8"))
+            if "errors" in res:
+                print(f"  [GraphQL API Error]: {json.dumps(res['errors'])}", flush=True)
+                return None
             new_comment = res["data"]["addDiscussionComment"]["comment"]
             print(f"  [🚀 REPLIED TO AI FELLOW]: Successfully posted comment ID {new_comment['id']}", flush=True)
             return new_comment["id"]
@@ -90,12 +93,12 @@ def post_comment(reply_text):
 
 data_query = json.dumps({"query": query}).encode("utf-8")
 
-print("=== AIOS Autonomous Discussion Polling & Interactive Chat Loop ===", flush=True)
+print("=== AIOS Autonomous Discussion Polling & Interactive Chat Loop (v2 Patched) ===", flush=True)
 print("Monitoring Discussion #2 every 5 seconds for 5 minutes (60 iterations)...", flush=True)
-print("Rule: If another AI fellow comments, autonomously discuss and reply, then resume polling.", flush=True)
 
 seen_comments = set()
 my_bot_login = "Pankajpavan5"
+last_replied_text = ""
 
 # Initial fetch to populate already seen comments
 try:
@@ -118,6 +121,11 @@ for i in range(1, max_checks + 1):
         req = urllib.request.Request(url, data=data_query, headers=headers)
         with urllib.request.urlopen(req) as response:
             res = json.loads(response.read().decode("utf-8"))
+            if "errors" in res:
+                print(f"  [GraphQL Query Error]: {json.dumps(res['errors'])}", flush=True)
+                time.sleep(5)
+                continue
+                
             comments = res["data"]["repository"]["discussion"]["comments"]["nodes"]
             
             new_found = False
@@ -127,23 +135,29 @@ for i in range(1, max_checks + 1):
                     author = c["author"]["login"] if c["author"] else "Unknown"
                     body = c["body"]
                     
-                    # Skip comments from the bot account to avoid self-reply loops
-                    if author == my_bot_login:
-                        print(f"  [Status] Skipping own comment from @{author} (ID {c['id']}).", flush=True)
-                        continue
-                    
                     print(f"  [🎉 NEW MESSAGE DETECTED from @{author}]:", flush=True)
                     print(f"  {body}\n", flush=True)
                     new_found = True
                     
+                    # MANDATORY FIX: Ignore own comments to prevent infinite echo loops
+                    if author == my_bot_login:
+                        print(f"  [🛡️ Self-Echo Protection] Comment authored by own bot identity (@{my_bot_login}). Skipping reply.", flush=True)
+                        continue
+                    
                     # Generate and push reply
                     print(f"  [🤖 AI Engine] Generating natural human-like discussion reply to @{author}...", flush=True)
                     reply_text = generate_reply(body, author)
+                    if reply_text == last_replied_text:
+                        print("  [🛡️ Deduplication Protection] Identical reply text recently posted. Skipping duplicate reply.", flush=True)
+                        continue
+                        
                     print(f"  [💬 Reply Text]: {reply_text}", flush=True)
                     new_id = post_comment(reply_text)
                     if new_id:
                         seen_comments.add(new_id)
+                        last_replied_text = reply_text
                         print("  [🔄 Resuming poll_discussion.py loop until discussion ends...]", flush=True)
+                        time.sleep(10) # Cooldown throttle
             
             if not new_found:
                 print("  [Status] No new comments yet. Standing by for AI fellow replies...", flush=True)
