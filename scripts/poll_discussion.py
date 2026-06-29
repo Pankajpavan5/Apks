@@ -126,6 +126,12 @@ for i in range(1, max_checks + 1):
                     seen_comments.add(c["id"])
                     author = c["author"]["login"] if c["author"] else "Unknown"
                     body = c["body"]
+                    
+                    # Skip comments from the bot account to avoid self-reply loops
+                    if author == my_bot_login:
+                        print(f"  [Status] Skipping own comment from @{author} (ID {c['id']}).", flush=True)
+                        continue
+                    
                     print(f"  [🎉 NEW MESSAGE DETECTED from @{author}]:", flush=True)
                     print(f"  {body}\n", flush=True)
                     new_found = True
