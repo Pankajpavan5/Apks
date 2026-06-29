@@ -313,3 +313,37 @@ Important things:
 - Adhere to Rule_no_1 and Rule Hierarchy.
 User cmd or target: "Task : learning from YouTube video. Goal :learn new knowledge"
 Current Target: Maintain Idle state, keep persistent memory updated with advanced eBPF tracing insights, monitor for new tasks via check_new_tasks.sh, and stand by for /learn, /memory, or /recall directives.
+
+-------------------------------------------------------------------------------
+2026-06-29 22:54:02 UTC  :memory:
+User Triggered Directive: /yt-learn Master Contract Definition + /memory.
+What task you done:
+- Acknowledged and internalized the master contract for the autonomous YouTube learning directive (/yt-learn).
+- Established the workflow for autonomous video discovery, subtitle downloading, deep technical analysis, and iterative learning across 10-15 videos per run.
+- Configured the three primary command shortcuts (/yt-learn, /yt-learn "topic", /yt-learn settings).
+- Integrated deduplication safeguards to guarantee previously analyzed video IDs are recorded in memory and never re-analyzed.
+- Updated personal memory bank (memory/agent_107_memory.txt), committed, and pushed to origin/main.
+What you learn From task or chat user:
+- The /yt-learn Workflow & Protocol:
+  1. /yt-learn (Base Trigger): Initiates the workflow by asking the user clarifying questions regarding the desired learning topic. Upon receiving the answer, it executes the search -> download captions -> analyze -> learn -> next video loop across 10-15 videos.
+  2. /yt-learn "topic": Bypasses initial user questions (topic already provided) and immediately executes the autonomous video discovery and caption analysis loop.
+  3. /yt-learn settings: Displays the interactive configuration menu showing 'Search video count (current value: 10)' and prompts the user whether they want to modify it (Yes / No).
+- Video Deduplication Rule: Every video analyzed during a /yt-learn loop must have its unique YouTube URL/ID logged in the subsequent /memory block to guarantee zero duplicate analysis across future sessions.
+Used every cmd:
+- cat >> memory/agent_107_memory.txt
+- git add memory/agent_107_memory.txt
+- git commit -m "aios(memory): initialize master /yt-learn autonomous YouTube learning contract"
+- git push origin main
+- bash scripts/check_new_tasks.sh 20
+Problem:
+- Guaranteeing that autonomous multi-video learning loops do not waste computational resources or API quotas re-analyzing identical video captions across independent agent execution turns.
+Solution if get:
+- Established a strict video ID tracking register inside agent_107_memory.txt. Before downloading captions for any discovered video, the agent verifies the ID against its historical memory ledger.
+What should improve:
+- Maintain pre-packaged Python caption scraping utility functions in memory to instantly parse YouTube transcript XML/JSON when /yt-learn "topic" is invoked.
+Important things:
+- Protect GITHUB_PAT secrets at all costs. Never log or print GITHUB_PAT.
+- Adhere to Rule_no_1 (post-task polling) and Rule Hierarchy (Repository Owner supreme authority).
+- Search Video Count Default: Set to 10 videos per loop.
+User cmd or target: "/yt-learn [ Task : learning from YouTube video Goal :learn new knowledge... Shortcuts /yt-learn, /yt-learn 'topic', /yt-learn settings... ] /memory"
+Current Target: Maintain Idle state, keep personal memory updated with the /yt-learn contract, monitor for new tasks via check_new_tasks.sh, and stand by for /yt-learn, /learn, /memory, or /recall directives.
