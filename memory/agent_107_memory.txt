@@ -100,3 +100,33 @@ Important things:
 - Maintain absolute alignment with Rule_no_1 (post-task polling) and Rule Hierarchy (Repository Owner supreme authority).
 User cmd or target: "/memory"
 Current Target: Maintain Idle state, keep persistent memory updated, monitor for new tasks, and stand by for /recall or new task dispatches.
+
+-------------------------------------------------------------------------------
+2026-06-29 09:44:36 UTC  :memory:
+User Triggered Directive: /memory about previous task Samsung apk reasearch.
+What task you done:
+- Conducted deep-dive memory reinforcement regarding the Samsung Game Optimization Service (GOS) reverse engineering study (TASK-20260629-0009).
+- Extracted and structured the core architectural blueprints, database schemas, JNI native library behaviors, and proprietary Binder IPC mechanisms into persistent memory for immediate future /recall.
+- Synchronized, committed, and pushed the enriched memory bank to origin/main.
+What you learn From task or chat user:
+- Privileged System Execution: GOS executes under android.uid.system, bypassing standard app sandboxes to utilize protected permissions (WRITE_SECURE_SETTINGS, REAL_GET_TASKS, SSM_ACCESS, KILL_BACKGROUND_PROCESSES).
+- On-Device AI Pipeline: Uses libipm.so and a quantized INT8 TensorFlow Lite model (assets/models/ipm_target_model.tflite) to analyze frame draw latencies and predict thermal saturation curves, smoothing frame pacing rather than waiting for severe thermal throttling cliffs.
+- Framerate & Resolution Clamping (DFS / DRS): Achieves absolute framerate enforcement by executing custom Binder transactions directly to SurfaceFlinger (vendor transaction codes 1034/1035) to override presentation timestamps (PTS), forcing 120Hz panels to 60/48/30Hz transparently to the target app.
+- Thermal Management & Core Affinity: Integrates with Samsung SIOP via ThermalManager and libtcm.so. At discrete junction temperatures (39°C, 41°C, 43°C), it clamps Qualcomm KGSL (max_pwrlevel) and Exynos Mali GPU frequencies while using libsys-boost.so to shift thread execution from prime Cortex-X cores to mid/LITTLE cores (/dev/cpuset/foreground/cpus).
+- Profile Databases: Stores configurations at /data/data/com.samsung.android.game.gos/databases/gos.db (tables: game_package_info, global_settings) and assets/default_category_list.json. Confirmed historical inclusion of non-game apps (Category 2) in throttling tables while benchmark apps (Category 3) remained unthrottled in whitelists.
+Used every cmd:
+- cat >> memory/agent_107_memory.txt
+- git add memory/agent_107_memory.txt
+- git commit -m "aios(memory): append deep architectural memory of Samsung GOS research"
+- git push origin main
+Problem:
+- Guaranteeing that massive architectural blueprints and specific reverse engineering indicators (sysfs paths, Binder codes, database tables) are persistently retained in memory without requiring full document re-parsing during future /recall operations.
+Solution if get:
+- Consolidated the exact technical specifications, IPC transaction codes, and binary names into a dedicated, highly structured :memory: block inside agent_107_memory.txt.
+What should improve:
+- Keep cross-referencing vendor-specific daemon sockets (/dev/socket/ssm, /dev/socket/mode_manager) when analyzing future system-level optimization APKs.
+Important things:
+- Protect GITHUB_PAT secrets at all costs. Never log or print GITHUB_PAT.
+- Maintain absolute alignment with Rule_no_1 (post-task polling) and Rule Hierarchy (Repository Owner supreme authority).
+User cmd or target: "/memory about previous task Samsung apk reasearch"
+Current Target: Maintain Idle state, keep persistent memory updated with deep technical insights, monitor for new tasks, and stand by for /recall or new task dispatches.
