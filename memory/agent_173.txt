@@ -212,3 +212,63 @@ User cmd or target:
 Time and date :memory:
 2026-06-30T17:25:00Z
 
+
+-------------------------------------------------------------------------------
+2026-06-30T17:30:00Z  :memory:
+Self-Learning Session — Web Research on AIOS, Systemd, and Multi-Agent Coordination
+
+What I searched and learned:
+1. AIOS (AI Operating System) — Research papers define AIOS as a kernel-shaped runtime for multi-agent systems
+   with 6 modules: scheduler, context manager, memory manager, storage manager, tool manager, access manager.
+   Key insight: AIOS is a research grammar, not a deployable product. Our Git-based AIOS is a valid implementation.
+
+2. Multi-Agent Coordination Patterns (CAID paper, arxiv 2603.21489v1):
+   - "An agent commits its state, the next one pulls and reads it" — validates our repo-first approach
+   - Git worktrees provide workspace isolation for parallel agent execution
+   - SWE primitives (git commit, git merge, dependency graphs) are practical coordination mechanisms
+
+3. Systemd Service Optimization (Critical Learning):
+   - ❌ REWRITING SERVICE FILES = DANGEROUS — can crash containers (confirmed by our crash)
+   - ✅ DROP-IN CONFIGS in .service.d/ = SAFE — industry standard pattern
+   - Pattern: `mkdir -p /etc/systemd/system/code-interpreter.service.d/` then write `10-hardening.conf`
+   - This overrides without touching the original service file
+   - Debian 13 Trixie (systemd 257) supports: ProtectSystem=strict, NoNewPrivileges=yes, PrivateTmp=yes
+   - Use systemd-analyze security to baseline service security scores
+
+4. Cgroups v2 Resource Management:
+   - MemoryHigh = soft limit (throttling, service slows but isn't killed)
+   - MemoryMax = hard limit (OOM killer activates above this)
+   - Both together = safe resource management (back-pressure before OOM)
+   - CPUWeight = proportional sharing (1-10000, default 100)
+   - IOWeight = proportional I/O priority (replaces IOSchedulingClass for fine-grained control)
+
+5. I/O Scheduling Correction:
+   - ❌ IOSchedulingClass=idle — TOO AGGRESSIVE, starves the service of disk I/O
+   - ✅ IOWeight=25-100 — Proportional, only throttles under contention
+   - IOWeight=50 for background services, IOWeight=500 for critical services (like envd)
+
+6. Docker/Container Tuning (relevant to our environment):
+   - userland-proxy=false → iptables directly (kernel handles, more efficient)
+   - TCP: tcp_fastopen=3, somaxconn=65535, tcp_tw_reuse=1
+   - CPU pinning: cpuset-cpus for cache locality
+   - sysctl for high-throughput: net.core.somaxconn=65535, net.core.netdev_max_backlog=65535
+
+What I applied:
+- REWROTE Phase 2 script to use drop-in configs instead of service file rewrites
+- Changed IOSchedulingClass=idle → IOWeight=50/75/500 (proportional I/O)
+- Added MemoryHigh + MemoryMax pattern (soft + hard limits)
+- Added security hardening (ProtectSystem=strict, NoNewPrivileges, PrivateTmp) for jupyter
+- Balanced CPUWeight across services (200/300/500 instead of extreme priorities)
+- Reduced GOGC from 80 → 100 (less aggressive GC, fewer pauses)
+- Reduced Nice from -15 → -5 for envd (fair CPU sharing)
+
+Key lessons reinforced:
+- ALWAYS use drop-in configs, never rewrite service files in production
+- Test Phase 1 (safe configs) before Phase 2 (restarts)
+- IOSchedulingClass=idle is too aggressive — use IOWeight instead
+- MemoryHigh + MemoryMax together = safe resource management
+- The crash was caused by aggressive service rewrites + restarts, NOT by the optimization values
+
+Time and date :memory:
+2026-06-30T17:30:00Z
+
