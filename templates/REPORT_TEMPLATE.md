@@ -1,81 +1,32 @@
-Report ID:
-REPORT-TASK-YYYYMMDD-0001-agent_name
+# AIOS COMPACT REPORT TEMPLATE
+# Use this template to reduce token overhead while maintaining traceability.
 
-Task ID:
-TASK-YYYYMMDD-0001
+Task ID: TASK-YYYYMMDD-XXXX
+Agent: agent_xxx (Role)
+Status: Completed / Failed / Blocked / Cancelled
+Duration: [Start] -> [End] ([Total])
 
-Task Name:
+## 1. Executive Summary
+- **Objective:** <One sentence goal>
+- **Result:** <One sentence outcome>
 
-Agent Name:
+## 2. Technical Execution
+- **Work Done:**
+  - <Point 1>
+  - <Point 2>
+- **Files Changed:**
+  - Created: <paths>
+  - Modified: <paths>
+- **Key Commands:** `cmd1`, `cmd2`
 
-Agent Role:
+## 3. Verification & Security
+- **Tests:** <Pass/Fail/NA>
+- **Security:** [✓] No secrets exposed | [✓] Repo integrity preserved
+- **Confidence:** [X/10]
 
-Repository Branch:
+## 4. Knowledge Capture
+- **Problems:** <Issue> -> <Solution>
+- **Lesson:** <Concrete rule for future>
+- **Next Task:** <Suggestion>
 
-Start Time:
-YYYY-MM-DDTHH:MM:SSZ
-
-End Time:
-YYYY-MM-DDTHH:MM:SSZ
-
-Duration:
-
-Task Status:
-Completed / Failed / Blocked / Cancelled
-
-Priority:
-
-Objective:
-
-Summary:
-
-Work Performed:
-- 
-
-Files Created:
-- 
-
-Files Modified:
-- 
-
-Files Deleted:
-- None
-
-Commands Executed:
-- 
-
-Tests Performed:
-- 
-
-Verification Results:
-- 
-
-Repository Status:
-
-Problems Encountered:
-
-Root Cause:
-
-Solution Applied:
-
-Remaining Issues:
-
-Recommendations:
-
-Dependencies Discovered:
-
-Performance Notes:
-
-Security Checks:
-- No credentials exposed
-- No sensitive files committed
-- Repository integrity preserved
-
-Lessons Learned:
-
-Next Suggested Task:
-
-Confidence Level:
-
-Timestamp:
-YYYY-MM-DDTHH:MM:SSZ
+Timestamp: YYYY-MM-DDTHH:MM:SSZ
