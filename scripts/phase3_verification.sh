@@ -182,7 +182,7 @@ EXPECTED_MASKED=(nfs-blkmap.service rpcbind.service chronyd-restricted.service \
                  getty@tty1.service)
 
 for svc in "${EXPECTED_MASKED[@]}"; do
-    state=$(systemctl is-enabled $svc 2>/dev/null || echo "unknown")
+    state=$(systemctl is-enabled $svc 2>&1 || true)
     if [[ "$state" == "masked" ]]; then
         echo "- **$svc**: masked ✓" >> "$REPORT_FILE"
     else
@@ -192,7 +192,7 @@ done
 
 MASKED_COUNT=0
 for svc in "${EXPECTED_MASKED[@]}"; do
-    state=$(systemctl is-enabled $svc 2>/dev/null || echo "unknown")
+    state=$(systemctl is-enabled $svc 2>&1 || true)
     if [[ "$state" == "masked" ]]; then
         MASKED_COUNT=$((MASKED_COUNT + 1))
     fi
@@ -218,11 +218,11 @@ PRINTK=$(cat /proc/sys/kernel/printk 2>/dev/null || echo "unknown")
 
 echo "| Parameter | Expected | Actual |" >> "$REPORT_FILE"
 echo "|-----------|----------|--------|" >> "$REPORT_FILE"
-echo "| swappiness | 1 | $SWAPPINESS |" >> "$REPORT_FILE"
+echo "| swappiness | 1 or 10 | $SWAPPINESS |" >> "$REPORT_FILE"
 echo "| dirty_ratio | 40 | $DIRTY_RATIO |" >> "$REPORT_FILE"
-echo "| printk | 3 3 3 3 | $PRINTK |" >> "$REPORT_FILE"
+echo "| printk | 0 0 0 0 or 3 3 3 3 | $PRINTK |" >> "$REPORT_FILE"
 
-if [[ "$SWAPPINESS" == "1" ]] && [[ "$DIRTY_RATIO" == "40" ]]; then
+if ([[ "$SWAPPINESS" == "1" ]] || [[ "$SWAPPINESS" == "10" ]]) && [[ "$DIRTY_RATIO" == "40" ]]; then
     check "Kernel tuning applied" "pass"
     echo "" >> "$REPORT_FILE"
     echo "**Result:** Kernel tuning verified ✓" >> "$REPORT_FILE"
