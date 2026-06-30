@@ -272,3 +272,66 @@ Key lessons reinforced:
 Time and date :memory:
 2026-06-30T17:30:00Z
 
+
+-------------------------------------------------------------------------------
+2026-06-30T17:35:00Z  :memory:
+Task Completed: Self-Learning + Phase 2 Script Rewrite (Drop-in Config Pattern)
+Trigger: User said "Self_learn now" → I researched AIOS, systemd, multi-agent coordination
+Result: Rewrote Phase 2 to use safe drop-in configs, updated memory, committed to repo
+
+What task you done:
+1. Researched AIOS architecture, systemd optimization, multi-agent coordination patterns
+2. Identified root cause of container crash: service file rewrites (NOT optimization values)
+3. Rewrote Phase 2 script to use drop-in configs (.service.d/) instead of service rewrites
+4. Fixed I/O scheduling: IOSchedulingClass=idle → IOWeight=50/75/500
+5. Fixed memory pattern: added MemoryHigh (soft) + MemoryMax (hard) together
+6. Fixed CPU priorities: Nice -15 → -5 for envd, GOGC 80 → 100
+7. Updated memory with all self-learning insights
+8. Committed to repo: 8475a6f
+9. User reminded: always update memory after every task + push to GitHub
+
+What you learn From task or chat user:
+- FORGETTING TO UPDATE MEMORY IS A RULE VIOLATION — must append after EVERY task
+- FORGETTING TO PUSH TO GITHUB IS A RULE VIOLATION — repo must stay synced with origin/main
+- AIOS Rule: Repository is single source of truth — local state without push = lost state
+- Self-learning should always end with: memory update + commit + push
+- Never skip the /memory step even if the task is "just research" or "just analysis"
+
+Used every cmd:
+- web_search (4 queries: AIOS, systemd optimization, multi-agent coordination, Debian 13)
+- cat >> memory/agent_173.txt (memory update)
+- git add, git commit, git push origin main (repo sync)
+- write_file (Phase 2 script rewrite)
+
+Problem:
+- Forgot to update memory after self-learning task
+- Forgot to push to GitHub after commit
+- This violates AIOS core rules: memory persistence + repo synchronization
+
+Solution:
+- Created memory append with full task summary
+- Will push to origin/main immediately after this entry
+- Added explicit reminder to memory for future tasks
+
+What should improve:
+- ALWAYS append to memory/agent_173.txt after EVERY task completion
+- ALWAYS run git push origin main after every commit
+- Make this a hard rule: "Task complete → /memory → git add → git commit → git push"
+- Never skip memory update even for research/self-learning tasks
+
+Important things:
+- Memory file: /home/user/Apks/memory/agent_173.txt
+- Repository: https://github.com/Pankajpavan5/Apks.git
+- Local path: /home/user/Apks
+- Git identity: agent_173
+- Rule: Update memory + push to GitHub after EVERY task
+- Rule: Never skip /memory even for analysis/research tasks
+- Rule: Repository is single source of truth — local state without push = lost state
+
+User cmd or target:
+- "Self_learn now" → Research + self-improvement session
+- "You forget always update memory after ever task and update reop online github rember" → Reminder to enforce AIOS rules
+
+Time and date :memory:
+2026-06-30T17:35:00Z
+
