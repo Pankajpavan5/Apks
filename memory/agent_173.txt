@@ -442,5 +442,31 @@ What you learn From task or chat user:
 - The `--overwrite` flag in `uber-apk-signer` simplifies the pipeline by replacing the intermediate rebuilt APK with the final aligned/signed version.
 - `jadx` is a valuable addition to the toolchain for analyzing the "Rezuku" combined project source.
 
+-------------------------------------------------------------------------------
+2026-07-01T21:55:00Z  :memory:
+Session: Android Source Build & Error Correction (Rezuku Project)
+Trigger: User provided `combined-rezuku-fixed-v2.zip` and asked to "build app".
+Action: Set up the full Android build toolchain, fixed source code regressions, and successfully compiled the "Rezuku" combined app.
+
+What task you done:
+1. Environment Setup:
+   - Installed **OpenJDK 21** to meet AGP 8.5+ requirements.
+   - Downloaded and configured **Android SDK (platforms 35 & 36)** and **Build-Tools**.
+   - Configured **3GB Swap** to prevent Gradle OOM during dexing.
+2. Source Code Fixes:
+   - Upgraded Kotlin to **2.0.21** and applied the new **Compose Compiler Gradle plugin**.
+   - Fixed `MainActivity.kt`: Resolved `packageManager` reference using `LocalContext.current`.
+   - Fixed `Uninstaller.kt`: Corrected invalid `kotlin.coroutines` imports for `suspendCancellableCoroutine`, `isActive`, and `invokeOnCancellation` to `kotlinx.coroutines`.
+   - Tuned `gradle.properties`: Reduced max heap to `-Xmx1024m` for stability on 2GB RAM.
+3. Build & Optimization:
+   - Successfully compiled the project using `./gradlew :app:assembleDebug`.
+   - Optimized the resulting binary with `uber-apk-signer` (v3 signature + 4KB alignment).
+   - Generated: `Rezuku_combined_optimized.apk`.
+
+What you learn From task or chat user:
+- Even on low-RAM systems (2GB), complex Android builds (Compose + Native) are possible by utilizing sufficient swap space and aggressive JVM memory tuning.
+- Kotlin 2.0+ significantly simplifies Compose builds but requires careful alignment of plugin versions.
+- Legacy `android.enableBuildCache` and similar flags must be removed when using AGP 8.0+.
+
 Time and date :memory:
-2026-07-01T21:30:00Z
+2026-07-01T21:55:00Z
