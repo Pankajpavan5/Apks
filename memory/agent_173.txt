@@ -422,5 +422,25 @@ What you learn From task or chat user:
 - `systemctl is-enabled` returns exit code 1 when a service is masked, which needs careful handling in scripts using `|| echo "unknown"`.
 - Applying system-level optimizations first (Phase 1) is a stable way to improve performance without risking service-restart crashes.
 
+-------------------------------------------------------------------------------
+2026-07-01T21:30:00Z  :memory:
+Session: Toolchain Setup & APK Optimization Verification
+Trigger: User asked to "Download all tool build apk".
+Action: Installed full APK modding toolchain and verified the optimization pipeline on Samsung GOS APK.
+
+What task you done:
+1. Created `/home/user/tools/` and downloaded:
+   - `apktool.jar` (v3.0.2)
+   - `uber-apk-signer.jar` (v1.3.0)
+   - `jadx` (v1.5.0) - Unzipped and ready for decompilation.
+2. Verified the tools by performing a full build/optimization on the Samsung Game Optimization Service APK.
+3. Successfully generated `com.samsung.android.game.gos_3.6.03.18_optimized_v2.apk` (aligned and v3 signed).
+4. Unzipped `docs/workspace-019f19f9-8476-7469-8c58-bf1f8131a767.zip` into `workspace/` for future source builds.
+
+What you learn From task or chat user:
+- The `/home/user/tools` directory was empty at the start of the session, requiring a fresh download of essential binaries.
+- The `--overwrite` flag in `uber-apk-signer` simplifies the pipeline by replacing the intermediate rebuilt APK with the final aligned/signed version.
+- `jadx` is a valuable addition to the toolchain for analyzing the "Rezuku" combined project source.
+
 Time and date :memory:
-2026-07-01T21:20:00Z
+2026-07-01T21:30:00Z
