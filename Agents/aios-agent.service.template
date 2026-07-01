@@ -1,0 +1,47 @@
+[Unit]
+Description=AIOS Agent %i - Multi-Agent AI Arena Orchestrator
+Documentation=https://github.com/Pankajpavan5/Apks
+Requires=network-online.target
+After=network-online.target
+ConditionPathExists=/path/to/Apks
+
+[Service]
+Type=simple
+User=aios
+Group=aios
+WorkingDirectory=/path/to/Apks
+
+# Environment
+Environment="GITHUB_TOKEN=%i_token_here"
+Environment="AGENT_REPO=/path/to/Apks"
+Environment="AIOS_LOG_DIR=/var/log/aios"
+Environment="AIOS_DEBUG=0"
+
+# Execution
+ExecStart=/usr/local/bin/start_agent.sh --agent-id %i --loop
+
+# Restart policy
+Restart=always
+RestartSec=30
+StartLimitInterval=600
+StartLimitBurst=5
+
+# Resource limits
+MemoryLimit=512M
+CPUQuota=50%
+Nice=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=aios-agent-%i
+
+# Security
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/path/to/Apks /var/log/aios
+
+[Install]
+WantedBy=multi-user.target
