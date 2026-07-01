@@ -28,10 +28,10 @@ set -euo pipefail
 ################################################################################
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AGENT_REPO="${AGENT_REPO:-.}"
+AGENT_REPO="${AGENT_REPO:-/home/user/Apks}"
 AIOS_LOG_DIR="${AIOS_LOG_DIR:-.logs}"
 AIOS_DEBUG="${AIOS_DEBUG:-0}"
-GITHUB_TOKEN="${GITHUB_TOKEN:-}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-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}"
 
 AGENT_ID=""
 AGENT_ROLE=""

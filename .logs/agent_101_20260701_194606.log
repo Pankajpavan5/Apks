@@ -1,0 +1,24 @@
+[0;32m✅ Agent Bot Starter v1.0[0m
+[0;34mℹ️  Validating environment...[0m
+[0;32m✅ Python: Python 3.13.13[0m
+[0;32m✅ Repository: /home/user/Apks[0m
+[0;32m✅ Environment validated[0m
+[0;34mℹ️  Starting agent bot...[0m
+[0;34mℹ️    Agent ID: 101[0m
+[0;34mℹ️    Role: auto-detected[0m
+[0;34mℹ️    Repository: /home/user/Apks[0m
+[0;34mℹ️    Poll Interval: 60 seconds[0m
+[0;34mℹ️    Mode: loop[0m
+[0;32m✅ Running in continuous loop mode (Ctrl+C to stop)[0m
+
+======================================================================
+🤖 AIOS Agent Bot Starting
+======================================================================
+Agent ID: 101
+Role: analyst
+Repository: /home/user/Apks
+Poll Interval: 60s
+======================================================================
+
+❌ ERROR: GITHUB_TOKEN not set
+❌ Startup failed
