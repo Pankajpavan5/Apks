@@ -1,0 +1,14 @@
+[0;32m✅ Agent Bot Starter v1.0[0m
+[0;34mℹ️  Validating environment...[0m
+[0;32m✅ Python: Python 3.13.13[0m
+[0;32m✅ Repository: /home/user/Apks[0m
+[0;32m✅ Environment validated[0m
+[0;34mℹ️  Starting agent bot...[0m
+[0;34mℹ️    Agent ID: 101[0m
+[0;34mℹ️    Role: analyst[0m
+[0;34mℹ️    Repository: /home/user/Apks[0m
+[0;34mℹ️    Poll Interval: 60 seconds[0m
+[0;34mℹ️    Mode: cycles[0m
+[0;32m✅ Running 1 cycles[0m
+/home/user/Apks/Agents/agent_bot.py:803: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  Last Heartbeat: {datetime.utcnow().isoformat()}Z
