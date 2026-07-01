@@ -768,3 +768,97 @@ Rules to remember:
 
 Time and date :memory:
 2026-07-01T23:05:00+05:30
+
+-------------------------------------------------------------------------------
+2026-07-01T23:15:00+05:30  :memory:
+Supplemental recheck: small-to-small missed details from both Arena HTML chats
+Trigger: User asked: "Recheck anything miss small to small detail"
+Action: Re-scanned extracted text with keywords for timeout, no output, permission denied, source.properties, sdkmanager, OOM, BUILD FAILED/SUCCESSFUL, material-icons, queries, ZArchiver, APK, round-trip, BPE, lazy matching.
+
+Additional tiny bash/build problems and fixes learned from Arena _ Benchmark chat:
+1. Shell unresponsive after heavy Gradle:
+   - Symptom: even `echo ok`, `ls /home/user`, `free -m` returned "No output" and bash timed out at 5s/15s/30s/120s/180s.
+   - Root cause: previous Gradle/java process saturated the 2GB machine; tool waited until timeout killed processes.
+   - Fix: kill Gradle/Java, wait for long timeout recovery, then proceed with smaller modules. Rule: never start heavy Gradle in background without PID/log/kill plan.
+2. Default Gradle heap too high:
+   - Symptom: Shizuku gradle.properties had `org.gradle.jvmargs=-Xmx2048m` on a 1991MB RAM machine with zero swap.
+   - Fix: reduce to e.g. `-Xmx1280m -XX:MaxMetaspaceSize=512m`, disable parallelism/max-workers=1. Current stronger rule: prefer Xmx1024m/SerialGC on 2GB.
+3. Permission denied on Gradle wrapper:
+   - Symptom: `/bin/bash: ./gradlew: Permission denied`.
+   - Fix: `chmod +x gradlew` before any Gradle wrapper execution.
+4. Invalid JAVA_HOME after sandbox reset:
+   - Symptom: `ERROR: JAVA_HOME is set to an invalid directory: /usr/lib/jvm/java-21-openjdk-amd64` and `ls: cannot access ... No such file or directory`.
+   - Root cause: installed packages/toolchain can disappear between sandbox sessions.
+   - Fix: always verify `test -x "$JAVA_HOME/bin/java"` before build; reinstall/select actual JDK path if missing.
+5. sdkmanager permission/classpath corruption:
+   - Symptom 1: `/home/user/android-sdk/cmdline-tools/latest/bin/sdkmanager: Permission denied`.
+   - Fix: `chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/*`.
+   - Symptom 2: `Could not find or load main class com.android.sdklib.tool.sdkmanager.SdkManagerCli`.
+   - Root cause: broken/incomplete commandline-tools extraction after interrupted install.
+   - Fix: re-extract commandline-tools cleanly into cmdline-tools/latest.
+6. NDK interrupted install:
+   - Symptom: NDK directory existed but no `source.properties`.
+   - Fix: remove NDK directory and reinstall/re-extract until `source.properties` exists. Do not trust directory existence alone.
+7. Better build strategy from Shizuku chat:
+   - Avoid 10 full build cycles on low-RAM VM; use static analysis + targeted module builds + one final full build if possible.
+   - Build smaller modules first; Shizuku shell APK built even when manager build was too heavy.
+
+Additional tiny Android/Kotlin/Gradle problems and fixes learned from Chat 4:
+1. sdkmanager Java class version mismatch:
+   - Symptom: `UnsupportedClassVersionError ... SdkManagerCli has been compiled by a more recent version ... class file version 61.0`.
+   - Root cause: sdkmanager required Java 17+, but Java 11 was active.
+   - Fix: install/use Java 21 and export JAVA_HOME/PATH before sdkmanager.
+2. Maven TLS handshake with Java 11:
+   - Symptom: `Received fatal alert: handshake_failure` while resolving Gradle deps.
+   - Fix: use Java 21; for offline, vendor caches because network may fail.
+3. Kotlin compile errors fixed in Android port:
+   - `FinishableInputStream` unresolved/unused import -> remove import.
+   - `Byte == Int` invalid comparisons -> convert byte with `b.toInt() and 0xFF` before range/int checks.
+   - `LZMAInputStream` constructor type mismatch (`Long` interpreted as ArrayCache) -> use `LZMAInputStream(bais)` overload, not wrong size overload.
+   - `HorizontalDivider` missing in Compose BOM 2024.01.00 -> replace with `Divider()`.
+4. Coroutine/Compose missing imports/errors:
+   - Symptoms: unresolved `launch`, `rememberCoroutineScope`, `withContext should be called only from coroutine`, invalid mutable state delegate.
+   - Fix: import/use `rememberCoroutineScope`, call `scope.launch { withContext(...) }`, use correct `mutableStateOf` imports/delegates and avoid composable calls inside remember calculation.
+5. Gradle OOM exact dmesg evidence:
+   - OOM killed java during compile/dex with anon-rss around 872MB-1.16GB; no swap.
+   - Fix: `pkill -9 java`, drop caches, reduce heap, max-workers=1. If possible create swap; otherwise keep heap below available memory.
+6. Heavy debug APK cause:
+   - APK had classes.dex through classes7.dex due largely to Material Icons Extended and debug/unminified build.
+   - Fix: release minify/shrink, replace extended icons with vector drawables/core icons for size.
+7. Unresolved Material icons after removing extended dependency:
+   - Errors: Compress, FolderOpen, Speed, CreateNewFolder missing.
+   - Fix: either re-add `material-icons-extended` BOM-managed or replace icons.
+8. Runtime crash fixed:
+   - Symptom: `NoSuchMethodError KeyframesSpec$KeyframesSpecConfig.at()` on launch.
+   - Root cause: material-icons-extended pinned version mismatched Compose BOM.
+   - Fix: remove explicit icon version, BOM-manage all Compose artifacts together.
+9. Package visibility fix exact manifest block:
+   - Add <queries> before <application> for OPEN_DOCUMENT, CREATE_DOCUMENT, OPEN_DOCUMENT_TREE, and com.google.android.documentsui.
+10. Device_config files cleanup:
+   - User requested deletion; all `device_configlist*` files removed from /home/user/uploads in that chat. Lesson: respect cleanup requests and verify with `ls | grep` returning no output.
+11. Build success conditions from Chat 4:
+   - After low-memory tuning and dependency fixes, build succeeded:
+     `./gradlew assembleDebug --no-daemon --max-workers=1`
+   - Output: app-debug.apk ~15MB, copied to /home/user/NexusCompress-debug.apk.
+12. Release not solved in Chat 4:
+   - Debug APK built, but release APK, keystore signing, R8 shrink validation, actual device/ZArchiver testing, BZ2 pipeline implementation were not completed.
+
+Additional compression details learned:
+1. BPE exact failure:
+   - Example: 6000 -> 6118 encoded -> 5900 decoded; decoder lost data. Rule: every transform must have independent round-trip tests before use.
+2. LZ77 serializer state bug:
+   - Recent-offset cache must be maintained during token serialization/decoding, not use the final encoder recent_offsets state for all tokens.
+3. ARLE exact bug:
+   - Marker RUN_SHORT with length-2=0 decodes as run length 2, so it cannot represent a single literal byte 252-255. Need true escape format or avoid ARLE for arbitrary binary.
+4. Chunk boundary bug:
+   - Higher levels failed because decompressor did not know exact compressed chunk lengths. Fix: store comp_len per chunk in container header.
+5. V6 container/engine details:
+   - Header: MAGIC(4) + VERSION(1) + orig_size(4) + pipeline_id(1) + type_mode(1).
+   - Pipelines included LZMA1, ZLIB, LZMA1_TUNED, BZ2 (defined but not Android-implemented), LZMA2, structure-aware preprocessed modes, APK-LZMA2, passthrough.
+   - Always SHA256/byte-verify decompression for compression changes.
+
+Operational rule learned from this recheck:
+- For future large HTML chat learning, use keyword scans plus targeted sed ranges; first summary may miss small bash problems hidden around tool outputs. Always do a second pass for: `No output`, `Permission denied`, `UnsupportedClassVersionError`, `NoSuchMethodError`, `AppsFilter`, `source.properties`, `daemon disappeared`, `Unresolved reference`, and `BUILD SUCCESSFUL/FAILED`.
+
+Time and date :memory:
+2026-07-01T23:15:00+05:30
