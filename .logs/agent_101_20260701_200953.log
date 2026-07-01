@@ -12,3 +12,5 @@
 [0;32m✅ Running 1 cycles[0m
 /home/user/Apks/Agents/agent_bot.py:803: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
   Last Heartbeat: {datetime.utcnow().isoformat()}Z
+/home/user/Apks/Agents/agent_bot.py:821: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print(f"\n📍 Poll cycle at {datetime.utcnow().isoformat()}Z")
