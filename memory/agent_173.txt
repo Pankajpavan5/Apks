@@ -600,3 +600,171 @@ Next: Continue monitoring task/Pending for new assignments.
 
 Time and date :memory:
 2026-07-01T14:55:00Z
+
+-------------------------------------------------------------------------------
+2026-07-01T23:05:00+05:30  :memory:
+Session: Learned from two saved Arena HTML chats — Shizuku/Rezuku build failures and NexusCompress Android/APK build problem-solution matrix
+Trigger: User said: "/learn from chat 4 all little to little bash problem solution and problem and update in memory Arena _ Benchmark & This both html download sites chat"
+Source files read:
+1. /home/user/uploads/Arena _ Benchmark & Compare the Best AI Models (3).txt
+2. /home/user/uploads/Chat (4).txt
+
+What task you done:
+1. Read both saved Arena.ai MHTML/HTML chat snapshots deeply.
+2. Extracted text from the huge HTML files into local analysis files:
+   - /home/user/extracted_arena_text.txt
+   - /home/user/extracted_chat4_text.txt
+3. Identified all major and small bash/build/toolchain problems faced by previous AI agents.
+4. Extracted exact fixes/solutions from the chats for future reuse.
+5. Learned offline Android/APK build strategy when internet or Android SDK download is unavailable.
+
+What I learned from "Arena _ Benchmark & Compare the Best AI Models (3).txt" — Shizuku v13.6.0 / Rezuku build chat:
+- Project source used: https://github.com/RikkaApps/Shizuku/archive/refs/tags/v13.6.0.zip
+- Missing submodule problem:
+  Problem: ZIP source had empty api/ directory.
+  Symptom: api/manifest.gradle missing.
+  Fix: Download/populate RikkaApps/Shizuku-API into api/ OR vendor submodule content in repo before offline build.
+- Package/version target:
+  applicationId/namespace target: com.rezuku.pk
+  versionName: 1.0.0
+  versionCode: 1
+- Git history problem:
+  Problem: root build.gradle used `git rev-list --count HEAD` and `git rev-parse --short HEAD`; ZIP source had no .git.
+  Symptom: `For input string: ""` at build.gradle line 29.
+  Fix: initialize git repo or patch Gradle with safeExec fallback and releaseVersionCode/releaseVersionName defaults.
+- Java problem:
+  Problem: environment had Java 11 only.
+  Fix: install/use Java 21 for Shizuku/AGP 8.x builds:
+    export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+    export PATH=$JAVA_HOME/bin:$PATH
+- Android SDK problem:
+  Problem: ANDROID_HOME/ANDROID_SDK_ROOT empty; no sdkmanager initially.
+  Fix in that chat: installed commandline-tools, platform-tools, platforms;android-36, build-tools;36.0.0, ndk;29.0.13113456.
+  Important new rule from user: if Android SDK download is forbidden, do NOT rely on this path; use APKTool rebuild or pre-vendored offline SDK.
+- NDK problem:
+  Problem: incomplete NDK missing source.properties.
+  Symptom: `[CXX1101] NDK ... did not have a source.properties file`.
+  Fix: remove incomplete ndk dir and reinstall/extract complete NDK. Verify:
+    test -f $ANDROID_HOME/ndk/29.0.13113456/source.properties
+  Gradle fix: use `ndkVersion = "29.0.13113456"`; avoid deprecated ndk.dir in local.properties.
+- Gradle daemon/resource problem:
+  Problem: full manager build caused daemon disappearance/kill under low memory.
+  Fix: low-memory mode, build modules one by one, log to file instead of tail-only:
+    ./gradlew --no-daemon --max-workers=1 :module:assembleDebug > build.log 2>&1
+- Final state from HTML:
+  Gradle configuration succeeded and listed 12 projects (:aidl, :api, :common, :hidden-api-stub, :manager, :provider, :rish, :server, :server-shared, :shared, :shell, :starter).
+  :shell:compileDebugJavaWithJavac succeeded with only deprecation note.
+  Last broader build command had no captured output, so snapshot likely ended while command was running.
+
+What I learned from "Chat (4).txt" — NexusCompress + Android APK/ZArchiver plugin chat:
+- Built NexusCompress algorithm in versions V1/V2/V3/V6.
+- V1 problem: weak CA-LZ77 and huge Huffman table overhead.
+- V2 problem: better compression but broken round-trip due lazy matching not flushing pending match, losing ~5KB.
+- V3 problem: used zlib internally then Huffman re-encoded zlib output; this is double-compression and architecturally cannot beat ZIP.
+- V3 benchmark on device_configlist.txt (164,136 bytes):
+  7z PPMd Ultra 37,235; LZMA -9 38,440; ZIP -9 43,881; NexusCompress v3 44,621. Nexus v3 ranked last.
+- Important compression architecture lesson:
+  Bad: Input -> zlib(LZ77+Huffman) -> another Huffman -> output.
+  Good target: Input -> dynamic dictionary preprocessing -> custom LZ77 token stream -> range/arithmetic/ANS coder -> output.
+- APK-aware compression breakthrough:
+  APK files are ZIP archives; opaque recompression wastes potential.
+  Better: APK/ZIP -> decompress internal DEFLATE entries -> rebuild as STORED ZIP -> compress whole stored archive with LZMA2 -> restore original APK/ZIP structure on decompression.
+  This structure-aware APK preprocessing beat standard raw approaches in the chat.
+- Known algorithm bugs to remember:
+  1. arle_encode marker conflict: bytes 252-255 conflict with RLE markers; workaround: use simple_rle_encode.
+  2. dictionary_v2 lazy matching loses final pending match; fix required: flush pending match at stream end.
+  3. BPE preprocessor caused data loss; disable until fully reversible.
+  4. Python BWT is slow/O(n log n) and caused timeouts; use only selectively or implement faster suffix array/C extension.
+  5. Range coder implementation had carry/infinite-loop issues; needs rigorous tests.
+- NexusCompress v6 summary from chat:
+  Python v6 passed 35/35 tests, SHA256-exact.
+  Added LZMA2 via tukaani/xz in Android port, APK structure-aware pipeline, config/JSON/CSV/log/source/text preprocessors.
+  Android debug APK was built successfully in that chat: /home/user/NexusCompress-debug.apk (~15MB), but not present in current workspace.
+
+Small bash/build problems and exact solutions learned from Chat 4:
+1. Timeout problem:
+   Symptom: benchmark/build `timeout 181s`, `timeout 60s`, no output.
+   Cause: BWT/LZ77 slow or Gradle dexing on low RAM.
+   Solution: isolate components, run smaller tests, avoid BWT for large chunks, log output to files, use `timeout` intentionally with preserved logs.
+2. Bash `tail` hides root cause:
+   Problem: `cmd 2>&1 | tail -80` loses earlier important errors.
+   Solution: write full log first then tail:
+     cmd > build.log 2>&1; ec=$?; tail -100 build.log; exit $ec
+3. Missing gradle wrapper:
+   Symptom: gradle/wrapper/ missing, no gradle-wrapper.jar.
+   Fix: create gradle/wrapper/ and provide wrapper jar/properties, or use existing repo wrapper/offline Gradle distribution.
+4. Maven dependency download/TLS failure:
+   Symptom: `Received fatal alert: handshake_failure`, `Could not resolve com.google.dagger`, jose4j, slf4j, jdom2, commons-codec, javawriter, jsr305.
+   Root cause: dependency network/TLS/cache missing.
+   Fix for offline: vendor Gradle cache/dependencies, use local Maven repo, or avoid source Gradle build. Do not assume internet.
+5. Gradle daemon disappeared:
+   Symptom: `Gradle build daemon disappeared unexpectedly`.
+   Confirmed cause: dmesg showed OOM killer killed java.
+   Fix used successfully:
+     pkill -9 java 2>/dev/null
+     sync && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null 2>&1
+     ./gradlew assembleDebug --no-daemon --max-workers=1
+   gradle.properties low-memory config:
+     org.gradle.jvmargs=-Xmx1024m -XX:+UseSerialGC -XX:MaxMetaspaceSize=512m -Dfile.encoding=UTF-8
+     org.gradle.parallel=false
+     org.gradle.caching=true
+     org.gradle.daemon=false
+     kotlin.daemon.jvmargs=-Xmx768m -XX:+UseSerialGC
+     org.gradle.workers.max=1
+6. Compose Material icon version crash:
+   Symptom: app crash `NoSuchMethodError: KeyframesSpec$KeyframesSpecConfig.at()`.
+   Root cause: material-icons-extended pinned to 1.5.4 while Compose BOM resolved other libs to 1.6.x.
+   Fix: remove explicit version, let Compose BOM manage it:
+     androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+7. Android 11+ package visibility problem:
+   Symptom: `AppsFilter: BLOCKED`; DocumentsUI/file picker could not open.
+   Fix in AndroidManifest:
+     <queries>
+       <intent><action android:name="android.intent.action.OPEN_DOCUMENT" /></intent>
+       <intent><action android:name="android.intent.action.CREATE_DOCUMENT" /></intent>
+       <intent><action android:name="android.intent.action.OPEN_DOCUMENT_TREE" /></intent>
+       <package android:name="com.google.android.documentsui" />
+     </queries>
+8. Kotlin unresolved icons:
+   Symptom: Unresolved reference: Compress, CreateNewFolder, FolderOpen, Speed.
+   Cause: icons are in material-icons-extended, not core icons.
+   Fix: add material-icons-extended BOM-managed dependency OR replace with custom drawables/core icons to reduce APK size.
+9. APK size problem:
+   Symptom: debug APK 15MB, 7 dex files.
+   Cause: Material Icons Extended and debug/unminified build.
+   Fix: release build with R8/shrinkResources; remove material-icons-extended or replace icons with small vector drawables.
+10. BZ2 pipeline problem:
+   Symptom: BZ2 pipeline IDs defined but not implemented on Android.
+   Cause: java.util.zip has no BZ2.
+   Fix: add Apache Commons Compress or remove/disable BZ2 pipeline in Android port.
+11. ZArchiver plugin protocol details:
+   Discovery action: ru.zdevs.zarchiver.plugin.PLUGIN_APPLICATION
+   Provider must be exported=true and no permission requirement.
+   ZArchiver uses query(selection="get=accounts"), call() for mkdir/rename/remove/disk/flush, and openFile() custom modes w2/w4.
+   Need mode sanitization w2/w4 -> wt or r.
+   Need takePersistableUriPermission for SAF persistence.
+
+Offline Android build conclusion learned from both HTML chats:
+- If Android SDK download is forbidden, normal Android Gradle source build is not a valid path unless a complete offline SDK and Gradle/Maven cache already exist.
+- Correct fallback: APKTool pipeline using existing APK:
+  java -jar apktool.jar d app.apk -o work
+  edit manifest/resources/smali
+  java -jar apktool.jar b work -o rebuilt.apk
+  sign with uber-apk-signer/apksigner-compatible tool
+- For source builds, must provide complete offline bundle:
+  Android SDK platforms/android-XX/android.jar, build-tools/aapt2/d8/apksigner, optional ndk/source.properties, Gradle distribution, Maven dependency cache.
+
+Current repo relevance:
+- /home/user/Apks/combine/gradle.properties currently has high-memory/parallel settings from older state; if source build attempted on 2GB RAM, change to low-memory config learned above.
+- Existing APK present: /home/user/Apks/space/apks/Rezuku_combined_optimized.apk. If no Android SDK, patch/rebuild this APK via apktool instead of Gradle.
+- Existing source zip present in docs/combined-rezuku-fixed-v2.zip and current combine/ source, but Gradle source build needs SDK/caches.
+
+Rules to remember:
+- Always extract full logs to file, never rely only on `tail`.
+- Always verify round-trip byte equality/SHA256 for compression work.
+- Always use BOM-managed Compose dependencies; never pin one Compose artifact to mismatched version.
+- Always tune Gradle for 2GB RAM before Android builds.
+- Always prefer APKTool path when SDK is unavailable/offline.
+
+Time and date :memory:
+2026-07-01T23:05:00+05:30
