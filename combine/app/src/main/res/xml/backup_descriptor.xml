@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Don't back up the cached bloat-list or pairing ports; everything else is fine. -->
+    <exclude domain="file" path="uad_lists.json" />
+</full-backup-content>
