@@ -438,3 +438,48 @@ Every single agent received exactly **8 tasks** (40 topics per agent) and execut
 Time and date  :memory:
 2026-06-29T23:57:12Z
 ```
+
+---
+
+## 12. Agent 101 Upgrade — ANALYSER Problem/Solution Bot (2026-07-01)
+
+Agent 101 now has a specialized profile at `Agents/Agent_101.md`:
+
+```text
+AGENT: ANALYSER
+Role: Problem Analysis, Root-Cause Finder, Solution Engineer & AIOS Self-Improvement Bot
+Primary command: /anylasis
+Canonical script: scripts/anylasis.sh
+Output database: memory/problem&solution.md
+```
+
+### Purpose
+ANALYSER reads all AI memory, reports, task files, instructions, scripts, docs, and research. It extracts failures, warnings, missing tools, build problems, security issues, repeated bash mistakes, and successful fixes. It writes the canonical problem-solution database to `memory/problem&solution.md`.
+
+### Mandatory after-task rule
+After every completed task, run:
+
+```bash
+bash scripts/anylasis.sh
+```
+
+Then commit `memory/problem&solution.md` if it changed.
+
+### Analysis priorities
+1. Root cause before solution.
+2. Exact command output before summary.
+3. Verification command required for every claimed fix.
+4. No compression result without byte-exact/SHA256 round-trip verification.
+5. No Android Gradle source build without SDK/cache preflight.
+6. Use APKTool rebuild path when Android SDK is unavailable or forbidden.
+7. On 2GB RAM, use low-memory Gradle profile: no daemon, workers=1, SerialGC, Xmx about 1024m.
+8. Save full logs before tailing.
+9. Never store secrets/PATs.
+10. Promote recurring failures into standing prevention rules.
+
+### Canonical files
+- `Agents/Agent_101.md` — agent profile and operating protocol.
+- `scripts/anylasis.sh` — user-spelled analysis command.
+- `scripts/analysis.sh` — correct-spelling alias.
+- `memory/problem&solution.md` — generated problem-solution database.
+

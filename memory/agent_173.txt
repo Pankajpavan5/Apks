@@ -862,3 +862,59 @@ Operational rule learned from this recheck:
 
 Time and date :memory:
 2026-07-01T23:15:00+05:30
+
+-------------------------------------------------------------------------------
+2026-07-01T23:30:00+05:30  :memory:
+Session: Created Agent_101 ANALYSER profile and /anylasis problem-solution automation
+Trigger: User asked to use all AI memory, read all reports, and create a bot `/agent/Agent_101.md` like agent 173 that analyzes problems, finds solutions, self-improves AI brain, and after every task runs `/anylasis` to store fixes in memory/problem&solution.md.
+
+What task you done:
+1. Read Agent_173 profile, AI_BRAIN, agent_101 memory, and report inventory.
+2. Created `Agents/Agent_101.md` as the ANALYSER profile:
+   - Problem Analysis
+   - Root-Cause Finder
+   - Solution Engineer
+   - AIOS Self-Improvement Bot
+   - Detailed `/anylasis` protocol
+   - After-every-task analysis requirement
+3. Created `scripts/anylasis.sh` canonical command:
+   - scans memory, reports, task, instructions, scripts, docs, research, Agents, messages
+   - extracts evidence hits by category
+   - writes `memory/problem&solution.md`
+   - includes canonical problem/solution table and reusable command recipes
+4. Created `scripts/analysis.sh` alias for correct spelling.
+5. Ran the analyser successfully:
+   - scanned 220 files
+   - generated 17 canonical problem entries
+   - wrote 425-line `memory/problem&solution.md`
+6. Updated `memory/AI_BRAIN.md` with Agent_101 ANALYSER upgrade section.
+
+What I learned From task or chat user:
+- User wants Agent 101 to be a persistent analysis bot, not just a task executor.
+- `/anylasis` spelling must be supported exactly.
+- Problems and solutions must be stored in memory folder, specifically `memory/problem&solution.md`.
+- After every completed task, analysis is mandatory.
+
+Problem:
+- Existing repository did not have `Agents/Agent_101.md`.
+- No canonical script existed for the `/anylasis` command.
+- Problem/solution knowledge was scattered across memory, reports, and prior HTML chat summaries.
+
+Solution:
+- Created a detailed Agent_101 profile and automated analysis script.
+- Generated the first canonical problem-solution database.
+- Added AI_BRAIN instructions so future agents know to run analysis after tasks.
+
+What should improve:
+- Future tasks should end with `bash scripts/anylasis.sh` before memory/commit.
+- `memory/problem&solution.md` should be regenerated whenever new reports/memory/tasks are added.
+- Add CI check later to warn if memory or reports changed but problem&solution.md was not regenerated.
+
+Important things:
+- Canonical command: `bash scripts/anylasis.sh`
+- Alias: `bash scripts/analysis.sh`
+- Output: `memory/problem&solution.md`
+- Agent profile: `Agents/Agent_101.md`
+
+Time and date :memory:
+2026-07-01T23:30:00+05:30
