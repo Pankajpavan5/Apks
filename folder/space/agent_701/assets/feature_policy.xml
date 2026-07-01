@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<features>
-    <feature name="DRS" supported="true" min_scale="0.5" default_scale="0.9" />
-    <feature name="DFS" supported="true" clamp_modes="120,60,48,30" />
-    <feature name="IPM" supported="true" model_path="assets/models/ipm_target_model.tflite" />
-    <feature name="TCM" supported="true" emergency_temp="43" severe_temp="41" warning_temp="39" />
-    <feature name="CPU_BOOST" supported="true" max_boost_duration_ms="3000" />
-</features>
