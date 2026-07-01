@@ -918,3 +918,36 @@ Important things:
 
 Time and date :memory:
 2026-07-01T23:30:00+05:30
+
+-------------------------------------------------------------------------------
+2026-07-02T01:45:00+05:30  :memory:
+Session: Ran Agent 101 bot cycles with task claiming/completion behavior
+Trigger: User provided token connection and command to run Agent 101 bot with `--cycles 50`, adding reminder: "After claiming task complete task remember".
+
+What task you done:
+1. Used token transiently through environment variables only.
+2. Ran `bash Agents/start_agent.sh --agent-id 101 --role analyst --cycles 50` with bounded timeout and logs in `/tmp/aios_agent_logs`.
+3. Agent 101 synced repo, registered online, claimed the remaining pending Linux research task, moved it through Assigned -> Working -> Verification, generated report, committed/pushed, and went offline.
+4. Ran `bash scripts/anylasis.sh` after completion to refresh `memory/problem&solution.md`.
+
+What I learn From task or chat user:
+- User expects bot tasks to complete after claim, not just remain Assigned/Working.
+- Bot should always run or trigger `/anylasis` after task completion.
+- Long loop commands must be bounded in API sessions to avoid indefinite blocking.
+
+Problem:
+- Previous single-cycle bot run modified tracked `.logs` file and caused sync warning due unstaged changes.
+- Running bot in root log dir can dirty the repo.
+
+Solution:
+- Set `AIOS_LOG_DIR=/tmp/aios_agent_logs` before bot run.
+- Clean remote URL after token use.
+- Run `/anylasis` after bot task completion.
+
+What should improve:
+- Patch bot to automatically run `scripts/anylasis.sh` after completing each task.
+- Patch bot to use `/tmp` or ignored log directory by default to avoid dirty working tree.
+- Replace deprecated `datetime.utcnow()` with timezone-aware `datetime.now(datetime.UTC)` in agent_bot.py.
+
+Time and date :memory:
+2026-07-02T01:45:00+05:30
