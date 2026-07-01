@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Debloat Badge Colors -->
+    <color name="badge_recommended">#4CAF50</color>
+    <color name="badge_advanced">#FFC107</color>
+    <color name="badge_expert">#F44336</color>
+    <color name="badge_unsafe">#9C27B0</color>
+    <color name="badge_disabled">#9E9E9E</color>
+    <color name="badge_system">#424242</color>
+    <color name="badge_user">#2196F3</color>
+    <color name="badge_unknown">#757575</color>
+</resources>

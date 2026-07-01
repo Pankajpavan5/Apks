@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Shizuku</string>
+
+    <!-- Home -->
+    <string name="home_status_service_is_running">%1$s is running</string>
+    <string name="home_status_service_not_running">%1$s is not running</string>
+    <string name="home_status_service_version">Version %2$s, %1$s</string>
+    <string name="home_status_service_version_update"><![CDATA[Version %2$s, %1$s<br>Start again to update to version %3$s]]></string>
+
+    <string name="home_adb_title"><![CDATA[Start by connecting to a computer]]></string>
+    <string name="home_adb_description"><![CDATA[For devices without root, you need to use adb to start Shizuku (requires computer connection). This process needs to be repeated every time the device is restarted. Please <b><a href=\"%1$s\">read the help</a></b>.]]></string>
+    <string name="home_adb_button_view_help">Read help</string>
+    <string name="home_adb_button_view_command">View command</string>
+    <string name="home_adb_dialog_view_command_message"><![CDATA[<font face="monospace">%1$s</font><br><br>* There are some other considerations, please confirm that you have read the help first.]]></string>
+    <string name="home_adb_dialog_view_command_copy_button">Copy</string>
+    <string name="home_adb_dialog_view_command_button_send">Send</string>
+
+    <string name="home_wireless_adb_title"><![CDATA[Start via Wireless debugging]]></string>
+    <string name="home_wireless_adb_description"><![CDATA[On Android 11 or above, you can enable Wireless debugging and start Shizuku directly from your device, without connecting to a computer.<p>Please view the step-by-step guide first.]]></string>
+    <string name="home_wireless_adb_description_pre_11"><![CDATA[Before Android 11, connecting to a computer is required to enable Wireless debugging.]]></string>
+    <string name="home_wireless_adb_view_guide_button">Step-by-step guide</string>
+
+    <string name="home_root_title"><![CDATA[Start (for rooted devices)]]></string>
+    <string name="home_root_description"><![CDATA[In addition, Shizuku can be started automatically on boot. If not, please check if your system or third-party tools have restricted Shizuku.<br>You can refer to %s.]]></string>
+    <string name="home_root_description_sui"><![CDATA[If you are using Magisk, you can try %1$s. For root users, it will eventually replace Shizuku. Note, existing applications needs to change a little to use %2$s.]]></string>
+    <string name="home_root_button_start">Start</string>
+    <string name="home_root_button_restart">Restart</string>
+
+    <string name="home_app_management_title">Application management</string>
+    <plurals name="home_app_management_authorized_apps_count">
+        <item quantity="one">%d app authorized</item>
+        <item quantity="other">%d apps authorized</item>
+    </plurals>
+    <string name="home_app_management_view_authorized_apps"><![CDATA[Tap to manage authorized apps]]></string>
+    <string name="home_app_management_empty">Apps that has requested or declared Shizuku will show here.</string>
+
+    <string name="home_learn_more_title">Learn Shizuku</string>
+    <string name="home_learn_more_description">Learn how to develop with Shizuku</string>
+
+    <string name="home_adb_is_limited_title">You need to take an extra step</string>
+    <string name="home_adb_is_limited_description">Your device manufacturer has restricted adb permissions and apps using Shizuku will not work properly.\n\nUsually, this limitation can be lifted by adjusting some options in \"Developer options\". Please read the help for details on how to do this.\n\nYou may need to restart Shizuku for the operation to take effect.</string>
+
+    <string name="home_terminal_title">Use Shizuku in terminal apps</string>
+    <string name="home_terminal_description">Run commands through Shizuku in terminal apps you like</string>
+
+    <!-- NEW: Debloat & Shell -->
+    <string name="home_debloat_title">Debloat</string>
+    <string name="home_debloat_description">Remove unwanted system apps, bloatware and disable tracking services to improve performance and privacy.</string>
+
+    <string name="home_shell_title">Shell</string>
+    <string name="home_shell_description">Open an interactive shell using Shizuku permissions.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_user_interface">Appearance</string>
+    <string name="settings_black_night_theme">Black night theme</string>
+    <string name="settings_black_night_theme_summary">Use the pure black theme if night mode is enabled</string>
+    <string name="settings_startup">Startup</string>
+    <string name="settings_translation_contributors">Translation contributors</string>
+    <string name="settings_translation">Participate in translation</string>
+    <string name="settings_translation_summary">Help us translate %s into your language</string>
+    <string name="settings_start_on_boot">Start on boot (root)</string>
+    <string name="settings_start_on_boot_summary">For rooted devices, Shizuku is able to start automatically on boot</string>
+    <string name="settings_use_system_color">Use system theme color</string>
+
+    <!-- NEW: Experimental features -->
+    <string name="settings_experimental_features">Experimental features</string>
+    <string name="settings_hide_mode">Hide mode</string>
+    <string name="settings_hide_mode_summary">Discretion hide from other app detection</string>
+
+    <!-- Grant dialog -->
+    <string name="grant_dialog_button_allow">"Allow"</string>
+    <string name="grant_dialog_button_deny">"Deny"</string>
+
+    <!-- Starter -->
+    <string name="starter">Starter</string>
+    <string name="starting_root_shell" translatable="false">Starting root shell…</string>
+    <string name="start_with_root_failed">Can\'t start service because root permission is not granted or this device is not rooted.</string>
+
+    <!-- Misc -->
+    <string name="dialog_cannot_open_browser_title">Can\'t start browser</string>
+    <string name="toast_copied_to_clipboard">%s\nhas been copied to clipboard.</string>
+    <string name="toast_copied_to_clipboard_with_text"><![CDATA[<b>%s</b> has been copied to clipboard.]]></string>
+
+    <!-- Messages for legacy -->
+    <string name="dialog_legacy_not_support_title">%1$s does not support modern Shizuku</string>
+    <string name="dialog_legacy_not_support_message"><![CDATA[Legacy Shizuku has been deprecated since March 2019. Also, legacy Shizuku does not work on newer Android systems.<p>Please ask the developer of <b>%1$s</b> to update.]]></string>
+    <string name="dialog_requesting_legacy_title">%1$s is requesting legacy Shizuku</string>
+    <string name="dialog_requesting_legacy_message"><![CDATA[<b>%1$s</b> has modern Shizuku support, but it\'s requesting legacy Shizuku. This could because Shizuku is not running, please check in Shizuku app.<p>Legacy Shizuku has been deprecated since March 2019.]]></string>
+    <string name="dialog_requesting_legacy_button_open_shizuku">Open Shizuku</string>
+
+</resources>
