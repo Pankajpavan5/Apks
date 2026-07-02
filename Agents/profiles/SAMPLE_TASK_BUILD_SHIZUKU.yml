@@ -1,0 +1,297 @@
+# AIOS TASK DEFINITION: Build Shizuku 13.6.0 Release APK
+# Status: PENDING (ready to assign to BuildMaster-Shizuku)
+# Created: 2026-07-02
+# Priority: HIGH (blocking further testing)
+
+task:
+  id: "build_shizuku_release_v1_20260702"
+  title: "Build Shizuku 13.6.0 Release APK with Optimization"
+  type: "BUILD"
+  agent_assigned: "BuildMaster-Shizuku"
+  priority: "HIGH"
+  created_at: "2026-07-02T08:00:00Z"
+  deadline: "2026-07-02T14:00:00Z"
+  estimated_duration: "15 minutes"
+  
+context:
+  project: "Shizuku"
+  version: "13.6.0"
+  variant: "release"
+  optimization_profile: "production (R8 5-pass minification + resource collapse)"
+  target_system: "Debian 13 x86_64, 2-core Xeon, 2GB RAM"
+  
+dependencies:
+  - "build_system: Gradle 8.6+ ✓"
+  - "sdk: Android API 36 ✓"
+  - "ndk: Version 29.0.13113456 ✓"
+  - "jdk: Java 21 ✓"
+  - "source: Shizuku-13.6.0.zip (extracted)"
+  
+success_criteria:
+  - "APK generated: out/apk/shizuku-v13.6.0.rN.{HASH}-release.apk"
+  - "APK size: <4.2 MB (target: 4.0 MB)"
+  - "Build time: <240s (target: <210s)"
+  - "ProGuard mapping: out/mapping/mapping-13.6.0.rN.{HASH}.txt"
+  - "APK signature: Valid (verified with jarsigner)"
+  - "aapt badging: No errors"
+  - "Build report: build_report_*.md (with metrics)"
+  - "Git commit: Artifacts + report pushed"
+  - "Memory updated: ai_brain/Problem.md, build_baseline.md"
+
+failure_criteria:
+  - "APK not generated"
+  - "Build time exceeds 300s (OOM/timeout suspected)"
+  - "Signing fails"
+  - "APK size > 5 MB"
+  - "aapt badging reports errors"
+  - "ProGuard mapping missing"
+
+steps:
+  - step_id: "1_setup"
+    name: "Environment Setup & Validation"
+    description: "Validate system baseline and build prerequisites"
+    commands:
+      - "export ANDROID_SDK_ROOT=/android/sdk"
+      - "export ANDROID_NDK_ROOT=/android/ndk/29.0.13113456"
+      - "export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64"
+      - "export PATH=$JAVA_HOME/bin:$PATH"
+      - "cd /workspace/Shizuku-13.6.0"
+      - "echo '=== BASELINE AUDIT ===' > system_audit.md"
+      - "lscpu >> system_audit.md"
+      - "free -h >> system_audit.md"
+      - "df -h / >> system_audit.md"
+      - "./gradlew --version >> system_audit.md 2>&1"
+      - "java -version >> system_audit.md 2>&1"
+    expected_output: "system_audit.md generated, no errors"
+    timeout: "60s"
+    on_failure: "ESCALATE (contact Ops if SDK/JDK missing)"
+    
+  - step_id: "2_prep_gradle"
+    name: "Prepare Gradle Build System"
+    description: "Deploy optimized gradle.properties for 2-core/2GB system"
+    commands:
+      - "# Backup current gradle.properties"
+      - "cp gradle.properties gradle.properties.bak"
+      - "# Deploy optimized configuration"
+      - "cat > gradle.properties << 'EOF'\norg.gradle.jvmargs=-Xmx1200m -Xms512m -XX:+UseG1GC -XX:G1HeapRegionSize=8m -XX:+ParallelRefProcEnabled\norg.gradle.workers.max=2\norg.gradle.parallel=true\norg.gradle.configureondemand=true\norg.gradle.caching=true\nandroid.enableProfileInstaller=false\nandroid.enableVcsInfo=false\nkotlin.daemon.jvm.options=-Xmx800m\nEOF"
+      - "# Verify properties loaded"
+      - "./gradlew properties 2>&1 | grep -E 'gradle.jvmargs|workers.max|parallel' | head -5"
+    expected_output: "gradle.properties deployed, parallel=true, workers.max=2"
+    timeout: "30s"
+    on_failure: "CONTINUE (use system default, but log warning)"
+    
+  - step_id: "3_build_release"
+    name: "Assemble Release APK"
+    description: "Execute full release build pipeline (no clean, incremental)"
+    commands:
+      - "echo '[3] Building release variant...'"
+      - "BUILD_START=$(date +%s)"
+      - "./gradlew :manager:assembleRelease --profile 2>&1 | tee /tmp/build_${timestamp}.log"
+      - "BUILD_EXIT=$?"
+      - "BUILD_END=$(date +%s)"
+      - "BUILD_DURATION=$((BUILD_END - BUILD_START))"
+      - "echo \"Build exit code: $BUILD_EXIT\""
+      - "echo \"Build duration: ${BUILD_DURATION}s\""
+    expected_output: "BUILD SUCCESSFUL, APK in out/apk/, duration <240s"
+    timeout: "300s"
+    on_failure: "CHECK_LOGS (examine /tmp/build_*.log for OOM/timeout)"
+    log_capture: "/tmp/build_*.log"
+    
+  - step_id: "4_validate_apk"
+    name: "APK Validation & Verification"
+    description: "Verify APK integrity, signature, and correctness"
+    commands:
+      - "APK_FILE=$(ls -t out/apk/shizuku-*-release.apk | head -1)"
+      - "echo \"APK: $APK_FILE\""
+      - "# Size check"
+      - "APK_SIZE=$(du -h $APK_FILE | cut -f1)"
+      - "APK_SIZE_BYTES=$(stat -f%z $APK_FILE 2>/dev/null || stat -c%s $APK_FILE)"
+      - "APK_SIZE_MB=$((APK_SIZE_BYTES / 1048576))"
+      - "echo \"APK Size: ${APK_SIZE} (${APK_SIZE_MB} MB)\""
+      - "# AAPT badging"
+      - "echo '=== AAPT Badging ===' > /tmp/apk_info.txt"
+      - "aapt dump badging $APK_FILE >> /tmp/apk_info.txt 2>&1"
+      - "aapt_exit=$?"
+      - "if [ $aapt_exit -ne 0 ]; then echo 'ERROR: aapt badging failed'; exit 1; fi"
+      - "# Signature verification"
+      - "echo '=== Signature Verification ===' >> /tmp/apk_info.txt"
+      - "jarsigner -verify -verbose $APK_FILE >> /tmp/apk_info.txt 2>&1"
+      - "sig_exit=$?"
+      - "if [ $sig_exit -ne 0 ]; then echo 'ERROR: Signature invalid'; exit 1; fi"
+      - "cat /tmp/apk_info.txt"
+    expected_output: "APK valid, size <4.2 MB, signature OK"
+    timeout: "30s"
+    on_failure: "ESCALATE (APK integrity issue)"
+    
+  - step_id: "5_capture_artifacts"
+    name: "Capture Build Artifacts"
+    description: "Collect APK, ProGuard mapping, and build timeline"
+    commands:
+      - "# APK location"
+      - "APK_FILE=$(ls -t out/apk/shizuku-*-release.apk | head -1)"
+      - "echo \"APK artifact: $APK_FILE\""
+      - "# ProGuard mapping"
+      - "MAPPING=$(ls -t out/mapping/mapping-*.txt | head -1)"
+      - "if [ -z \"$MAPPING\" ]; then echo 'WARNING: ProGuard mapping not found'; fi"
+      - "echo \"ProGuard mapping: $MAPPING\""
+      - "# Gradle profile"
+      - "PROFILE=$(ls -t build/reports/profile/profile-*.html 2>/dev/null | head -1)"
+      - "echo \"Gradle profile: $PROFILE\""
+      - "# Extract key metrics from profile"
+      - "if [ -f \"$PROFILE\" ]; then grep -o 'Total.*</li>' $PROFILE | head -1; fi"
+    expected_output: "APK, mapping, profile captured"
+    timeout: "10s"
+    on_failure: "WARN (continue, but note missing artifacts)"
+    
+  - step_id: "6_generate_report"
+    name: "Generate Build Report"
+    description: "Create comprehensive build report with metrics"
+    commands:
+      - "TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)"
+      - "APK_FILE=$(ls -t out/apk/shizuku-*-release.apk | head -1)"
+      - "APK_SIZE=$(du -h $APK_FILE | cut -f1)"
+      - "MAPPING=$(ls -t out/mapping/mapping-*.txt | head -1)"
+      - "cat > build_report_${TIMESTAMP}.md << 'REPORT_EOF'\n# Shizuku 13.6.0 Release Build Report\n**Timestamp:** $(date -u +%Y-%m-%dT%H:%M:%SZ)\n**Agent:** BuildMaster-Shizuku\n**Task ID:** build_shizuku_release_v1_20260702\n\n## Build Summary\n- **Status:** SUCCESS\n- **Duration:** ${BUILD_DURATION}s\n- **APK:** ${APK_FILE}\n- **Size:** ${APK_SIZE}\n- **Mapping:** ${MAPPING}\n- **Variant:** release (R8 minification, resource collapse)\n\n## Build Details\n```\n$(aapt dump badging $APK_FILE | head -10)\n```\n\n## Performance Metrics\n- Build time: ${BUILD_DURATION}s\n- APK size: ${APK_SIZE}\n- Optimization: R8 5-pass, resource collapse enabled\n\n## Logs (Last 30 lines)\n```\n$(tail -30 /tmp/build_${TIMESTAMP}.log)\n```\nREPORT_EOF"
+      - "echo \"Report: build_report_${TIMESTAMP}.md\""
+      - "cat build_report_${TIMESTAMP}.md"
+    expected_output: "build_report_*.md generated with metrics"
+    timeout: "10s"
+    on_failure: "WARN (report generation is non-critical)"
+    
+  - step_id: "7_update_memory"
+    name: "Update Agent Memory & Learning"
+    description: "Log metrics, findings, and optimizations to memory system"
+    commands:
+      - "TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)"
+      - "APK_FILE=$(ls -t out/apk/shizuku-*-release.apk | head -1)"
+      - "# Append to build_baseline.md"
+      - "cat >> agents/BuildMaster-Shizuku/memory/build_baseline.md << 'MEMORY_EOF'\n\n## Build Run: ${TIMESTAMP}\n- **Duration:** ${BUILD_DURATION}s\n- **APK Size:** ${APK_SIZE}\n- **Status:** SUCCESS\n- **Variant:** release\n- **Optimization Profile:** production (R8 5-pass, resource collapse)\n- **System State:** 2-core Xeon, 2GB RAM, Debian 13\nMEMORY_EOF"
+      - "# Append to performance log (CSV)"
+      - "echo \"${TIMESTAMP},${BUILD_DURATION},${APK_SIZE},SUCCESS\" >> agents/BuildMaster-Shizuku/memory/performance_log.csv"
+      - "# Log system metrics"
+      - "echo '## System Baseline (Post-Build)' >> agents/BuildMaster-Shizuku/agent_info/system_baseline.md"
+      - "free -h >> agents/BuildMaster-Shizuku/agent_info/system_baseline.md"
+      - "df -h / >> agents/BuildMaster-Shizuku/agent_info/system_baseline.md"
+    expected_output: "Memory logs updated with build metrics"
+    timeout: "10s"
+    on_failure: "WARN (non-critical, but log for manual review)"
+    
+  - step_id: "8_git_commit"
+    name: "Commit & Push to GitHub"
+    description: "Push artifacts, reports, and memory updates to AIOS repo"
+    commands:
+      - "cd /workspace/Shizuku-13.6.0"
+      - "# Stage all artifacts"
+      - "git add -A"
+      - "# Commit with structured message"
+      - "TIMESTAMP=$(date -u +%Y%m%d_%H%M%S)"
+      - "APK_FILE=$(ls -t out/apk/shizuku-*-release.apk | head -1)"
+      - "APK_SIZE=$(du -h $APK_FILE | cut -f1)"
+      - "git commit -m \"build(Shizuku): Release APK ${TIMESTAMP} — ${APK_SIZE} | ${BUILD_DURATION}s\n\nAgent: BuildMaster-Shizuku\nTask: build_shizuku_release_v1_20260702\nStatus: SUCCESS\nVariant: release\nOptimization: R8 5-pass minification + resource collapse\nMetrics: duration=${BUILD_DURATION}s, apk_size=${APK_SIZE}\" || true"
+      - "# Tag build"
+      - "git tag -a v13.6.0-build-${TIMESTAMP} -m \"Shizuku 13.6.0 release build - ${APK_SIZE} - ${BUILD_DURATION}s\" || true"
+      - "# Push to remote"
+      - "git push origin main || true"
+      - "git push origin --tags || true"
+      - "echo 'Push complete'"
+    expected_output: "Artifacts pushed to origin/main, tags created"
+    timeout: "60s"
+    on_failure: "WARN (network issue, will retry on next cycle)"
+    
+  - step_id: "9_post_completion"
+    name: "Post-Completion Notification"
+    description: "Notify dependent agents and log completion"
+    commands:
+      - "# Write message for TestRunner agent"
+      - "cat > message_system/Agent-BuildMaster-to-TestRunner.txt << 'MSG_EOF'\nFROM: BuildMaster-Shizuku\nTO: TestRunner-APK\nTIMESTAMP: $(date -u +%Y-%m-%dT%H:%M:%SZ)\nTASK_ID: build_shizuku_release_v1_20260702\nSTATUS: SUCCESS\n\nRelease APK built successfully and ready for testing.\n\nArtifact: /workspace/Shizuku-13.6.0/out/apk/shizuku-v13.6.0.rN.{HASH}-release.apk\nSize: ${APK_SIZE}\nSignature: Valid\nMinAPI: 24, TargetAPI: 36\nProGuard Mapping: available\n\nNext Steps:\n- Install on test devices\n- Run functional tests (Shizuku permission workflow)\n- Verify no crashes on Android 24–36\n- Report results back\n\nExpected Test Duration: 15 minutes\nUrgency: Normal\nMSG_EOF"
+      - "# Log task completion"
+      - "echo \"Task build_shizuku_release_v1_20260702 completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> tasks/complete/BUILD_SHIZUKU_RELEASE.log"
+    expected_output: "Inter-agent message queued, completion logged"
+    timeout: "5s"
+    on_failure: "INFO (non-critical communication)"
+
+expected_outputs:
+  artifacts:
+    - "out/apk/shizuku-v13.6.0.rN.{HASH}-release.apk (4.0 MB target)"
+    - "out/mapping/mapping-13.6.0.rN.{HASH}.txt"
+    - "build/reports/profile/profile-*.html"
+  reports:
+    - "build_report_20260702_*.md"
+  logs:
+    - "agents/BuildMaster-Shizuku/memory/build_baseline.md (updated)"
+    - "agents/BuildMaster-Shizuku/memory/performance_log.csv (updated)"
+    - "agents/BuildMaster-Shizuku/agent_info/system_baseline.md (updated)"
+  communication:
+    - "message_system/Agent-BuildMaster-to-TestRunner.txt"
+  git:
+    - "Commit: build(Shizuku): Release APK ..."
+    - "Tag: v13.6.0-build-20260702_*"
+
+performance_expectations:
+  setup_phase: "60s (environment validation)"
+  build_phase: "180–240s (release build with R8 + resource collapse)"
+  validation_phase: "30s (APK verification)"
+  reporting_phase: "10s (report generation)"
+  commit_phase: "60s (git operations)"
+  total_expected: "~15 minutes (including all overhead)"
+
+notifications:
+  on_success:
+    - "TestRunner-APK (inter-agent message)"
+    - "AIOS #builds channel (if configured)"
+  on_failure:
+    - "CodeOptimizer-Shizuku (if source issue detected)"
+    - "Ops team (if system issue, escalation)"
+    - "AIOS #builds channel (failure notification)"
+
+retry_policy:
+  max_retries: 2
+  retry_delay: "300s (5 minutes)"
+  retry_on:
+    - "OOM (OutOfMemoryError)"
+    - "Timeout (>300s)"
+    - "Network failure (git push)"
+
+approval_required: false
+estimate_confidence: "HIGH (based on baseline measurements)"
+
+tags:
+  - "build"
+  - "shizuku"
+  - "apk"
+  - "release"
+  - "production"
+  - "optimization"
+
+---
+
+# Internal Notes for AIOS
+
+## Rationale
+This task builds the production-optimized Shizuku APK for distribution. It's a foundational task for the AIOS CI/CD pipeline and blocks all downstream testing/distribution workflows.
+
+## Risk Factors
+- **Heap pressure**: 2-core system may experience GC pauses if heap tuning is suboptimal
+- **Build time variance**: CMake sequential compilation can vary ±20% based on system load
+- **Reproducibility**: If gradle.properties or source changes, APK hashes will differ
+
+## Success Metrics
+- APK <4.2 MB (within budget)
+- Build <240s (within time budget)
+- Zero errors in aapt/jarsigner validation
+- All artifacts pushed to GitHub
+
+## Related Tasks
+- `build_shizuku_debug_*`: Faster dev variant (skip minification)
+- `test_shizuku_apk_*`: Functional testing on devices
+- `optimize_proguard_rules_*`: Rule tuning to improve build time
+
+## Handoff
+Upon success, this task hands off to TestRunner-APK for functional verification.
+Upon failure, escalate to CodeOptimizer-Shizuku or Ops depending on root cause.
+
+---
+
+Created: 2026-07-02 08:00:00 UTC
+Last Modified: 2026-07-02 08:00:00 UTC
+Status: READY FOR EXECUTION

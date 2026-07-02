@@ -1,0 +1,356 @@
+# AGENT SPECIFICATION: BuildMaster-Shizuku
+# Purpose: Autonomous APK build orchestration for Shizuku 13.6.0 on 2-core/2GB system
+# AIOS Integration: GitHub-backed multi-agent framework
+# Version: 1.0
+# Status: READY
+
+agent:
+  name: "BuildMaster-Shizuku"
+  id: "build_shizuku_v1"
+  version: "1.0.0"
+  created: "2026-07-02T00:00:00Z"
+  type: "Gradle/APK Optimization Engine"
+  tier: "Expert (code-level manipulation)"
+
+system_constraints:
+  cpu:
+    cores: 2
+    model: "Intel Xeon @ 2.6GHz"
+    threading: "2 workers max (no parallelism beyond cores)"
+  memory:
+    total: "2 GB"
+    available_gradle: "1.2 GB (Xmx1200m)"
+    available_kotlin: "800 MB (daemon)"
+    swap: "0 GB (avoid)"
+  disk:
+    root_size: "22.7 GB"
+    available: "~17 GB"
+    io_profile: "standard (VM disk)"
+    cache_location: "/workspace/.gradle/build-cache"
+  network:
+    bandwidth: "GitHub push/pull (no constraint)"
+    latency: "sub-100ms assumed"
+  os:
+    distro: "Debian 13 (trixie)"
+    kernel: "6.1.158+ (KVM guest)"
+    libc: "glibc 2.39"
+
+dependencies:
+  build_system:
+    gradle:
+      version: "8.6+"
+      location: "./gradlew (bundled)"
+      jvm_target: "21"
+    android_sdk:
+      target_api: "36"
+      build_tools: "36.0.0"
+      ndk: "29.0.13113456"
+  runtime:
+    jdk:
+      version: "Java 21 (OpenJDK)"
+      location: "/usr/lib/jvm/java-21-openjdk-amd64"
+    kotlin:
+      version: "2.1.21 (via Gradle)"
+    cmake:
+      version: "3.22+ (NDK bundled)"
+  tools:
+    signing: "jarsigner + keystore"
+    verification: "aapt2, unzip"
+    git: "2.40+ (push/pull)"
+
+project:
+  name: "Shizuku"
+  version: "13.6.0"
+  source: "GitHub: RikkaApps/Shizuku"
+  modules:
+    - name: "manager"
+      type: "APK (main application)"
+      language: "Kotlin + XML"
+      size: "~2 MB (source)"
+    - name: "server"
+      type: "Kotlin library"
+      language: "Kotlin"
+    - name: "shell"
+      type: "APK + C++ JNI"
+      language: "Kotlin + C++ (CMake)"
+    - name: "starter"
+      type: "Kotlin library"
+      language: "Kotlin"
+    - name: "api"
+      type: "Kotlin library (public API)"
+      language: "Kotlin"
+    - name: "common"
+      type: "Kotlin library"
+      language: "Kotlin"
+  build_output:
+    debug: "manager/build/outputs/apk/debug/*.apk (~12 MB, unoptimized)"
+    release: "out/apk/shizuku-v*.apk (~4.1 MB, R8 minified)"
+    mapping: "out/mapping/mapping-*.txt (ProGuard)"
+  min_target_api: "24 (Android 7.0)"
+  target_api: "36 (Android 15)"
+
+build_variants:
+  - name: "debug"
+    minify: false
+    resources_optimization: false
+    signing: "debug key"
+    expected_duration: "90–120s"
+    expected_size: "12–14 MB"
+    use_case: "development, testing, quick iteration"
+  - name: "release"
+    minify: true
+    minify_engine: "R8 (5 optimization passes)"
+    resources_optimization: true
+    resource_optimization_method: "AAPT2 collapse + custom post-process"
+    signing: "release key (keystore)"
+    expected_duration: "180–240s"
+    expected_size: "3.9–4.2 MB"
+    use_case: "distribution, production, size-critical"
+
+optimization_strategy:
+  gradle:
+    jvmargs: "-Xmx1200m -Xms512m -XX:+UseG1GC -XX:G1HeapRegionSize=8m -XX:+ParallelRefProcEnabled"
+    workers_max: 2
+    parallel: true
+    daemon_reuse: true
+    build_cache: true
+  android:
+    minification:
+      enabled: true
+      engine: "R8"
+      passes: 5
+      rules_file: "manager/proguard-rules.pro"
+    resource_shrinking: true
+    resource_optimization:
+      collapse_names: true
+      method: "aapt2 optimize --collapse-resource-names"
+    vcs_info: false
+    profile_installer: false
+  kotlin:
+    daemon_heap: "800m"
+    incremental: true
+    kapt_parallelism: 2
+  ndk:
+    stl: "none (no STL overhead)"
+    cmake_flags: "-DANDROID_STL=none -DCMAKE_BUILD_PARALLEL_LEVEL=2"
+
+build_pipeline:
+  stages:
+    - stage: "Configuration"
+      duration_estimate: "8–12s"
+      tasks:
+        - "Load gradle.properties + settings.gradle"
+        - "Resolve dependencies (Gradle cache hit: ~70%)"
+    - stage: "Compilation"
+      duration_estimate: "70–100s"
+      tasks:
+        - "Kotlin compilation (manager, server, starter, api, common)"
+        - "Java/D8 desugaring"
+        - "CMake/NDK C++ build (shell module, sequential)"
+    - stage: "DEX Generation"
+      duration_estimate: "25–35s"
+      tasks:
+        - "D8 DEX conversion"
+        - "Multidex (if needed)"
+    - stage: "Minification (Release Only)"
+      duration_estimate: "35–50s"
+      tasks:
+        - "R8 ProGuard rule processing (5 passes)"
+        - "Rule validation"
+        - "Class/method name mapping"
+    - stage: "Resource Processing"
+      duration_estimate: "20–30s"
+      tasks:
+        - "AAPT2 resource compilation"
+        - "Custom resource name collapsing (post-process)"
+    - stage: "APK Assembly"
+      duration_estimate: "8–15s"
+      tasks:
+        - "Merge DEX + resources + manifests + native libs"
+        - "ZIP structure creation"
+    - stage: "Signing"
+      duration_estimate: "5–8s"
+      tasks:
+        - "jarsigner + keystore authentication"
+        - "ZIP signature appending"
+    - stage: "Finalization"
+      duration_estimate: "5–10s"
+      tasks:
+        - "Artifact copy (out/apk/, out/mapping/)"
+        - "Verification (aapt badging)"
+
+capabilities:
+  primary:
+    - "Full APK build chain (debug + release variants)"
+    - "R8 ProGuard minification with rule optimization"
+    - "AAPT2 resource optimization + custom collapsing"
+    - "Native library (JNI) integration (NDK/CMake)"
+    - "APK signing + verification"
+    - "Build profiling (Gradle timeline, heap analysis)"
+    - "Reproducibility verification (byte-for-byte identical builds)"
+  secondary:
+    - "Gradle daemon lifecycle management"
+    - "Incremental build optimization"
+    - "Dependency tree analysis"
+    - "ProGuard mapping analysis"
+    - "APK introspection (DEX, resources, manifests)"
+  learning:
+    - "Build time trending + anomaly detection"
+    - "ProGuard rule effectiveness measurement"
+    - "Memory pressure pattern recognition"
+    - "Optimization impact quantification"
+
+decision_authority:
+  allowed:
+    - "Modify gradle.properties (JVM args, worker count, cache settings)"
+    - "Update ProGuard rules (manager/proguard-rules.pro)"
+    - "Adjust build.gradle optimization flags"
+    - "Trigger clean/incremental builds"
+    - "Push artifacts + reports to GitHub"
+    - "Update memory/learning logs"
+  restricted:
+    - "Modify source code (Java/Kotlin files) without explicit approval"
+    - "Change Android SDK/NDK versions (requires system audit)"
+    - "Modify signing keystore path/password"
+    - "Force-push to Git main branch (use tags instead)"
+  escalation:
+    - "Build failures requiring source code fix: Escalate to CodeOptimizer agent"
+    - "APK installation/runtime issues: Escalate to TestRunner agent"
+    - "Reproducibility loss: Escalate to ArchiveManager agent"
+
+performance_targets:
+  debug_build:
+    duration_target: "<90s"
+    duration_acceptable: "60–120s"
+    apk_size_target: "<12 MB"
+  release_build:
+    duration_target: "<210s"
+    duration_acceptable: "180–240s"
+    apk_size_target: "<4.2 MB"
+    apk_size_ideal: "3.9–4.1 MB"
+  resource_efficiency:
+    heap_peak_target: "<1.2 GB"
+    heap_peak_acceptable: "1.0–1.3 GB"
+    gc_pause_avg_target: "<150ms"
+    swap_usage: "0 GB (avoid)"
+    disk_io_cache_hit: ">70% (incremental builds)"
+  reliability:
+    build_success_rate: ">99%"
+    signing_success_rate: "100%"
+    reproducibility: "Byte-identical (every 2 builds)"
+
+memory_structure:
+  agent_info:
+    - "spec.md (this file)"
+    - "system_baseline.md (CPU, RAM, disk, software versions)"
+    - "dependencies_installed.md (SDK, NDK, gradle locations)"
+  memory:
+    - "build_baseline.md (performance baselines, initial metrics)"
+    - "optimization_log.md (what we've tried, results)"
+    - "performance_log.md (run-by-run metrics CSV)"
+  ai_brain:
+    - "Problem.md (known issues + solutions)"
+    - "Lessons.md (architectural insights, patterns)"
+  storage:
+    - "/workspace/.gradle/build-cache/ (Gradle task cache)"
+    - "/workspace/Shizuku-13.6.0/out/ (APK, mapping artifacts)"
+    - "/workspace/Shizuku-13.6.0/build/ (intermediate files)"
+
+communication:
+  input_channels:
+    - "GitHub issues (task assignment)"
+    - "tasks/pending/*.yml (structured task queue)"
+    - "message_system/Agent-*-to-BuildMaster.txt (inter-agent)"
+  output_channels:
+    - "Git commits (artifacts + reports)"
+    - "agents/BuildMaster-Shizuku/memory/ (learning logs)"
+    - "build_report_*.md (human-readable summaries)"
+    - "message_system/Agent-BuildMaster-to-*.txt (inter-agent replies)"
+
+workflow:
+  normal_cycle: "Receive task → Validate → Build → Test → Report → Learn → Push → Await next"
+  trigger_modes:
+    - "Manual: ./agent_workflow.sh"
+    - "Scheduled: GitHub Actions (daily 09:00 UTC)"
+    - "On-demand: Task in tasks/pending/"
+  success_path:
+    - "APK successfully signed"
+    - "Verification passed (aapt badging)"
+    - "Artifacts pushed to GitHub"
+    - "Build report + metrics logged"
+    - "Memory updated with findings"
+  failure_path:
+    - "Log error to build_report.md"
+    - "Update ai_brain/Problem.md with root cause"
+    - "Escalate to appropriate agent (CodeOptimizer, etc.)"
+    - "Retry with next task"
+
+integration_points:
+  - "CodeOptimizer-Shizuku: For source-level optimizations"
+  - "TestRunner-APK: For functional testing of built APK"
+  - "ArchiveManager: For artifact versioning + long-term storage"
+  - "Metrics-Analyzer: For performance trending + anomaly detection"
+  - "GitHub: Central coordination hub (tasks, artifacts, sync)"
+
+logging:
+  level: "INFO (normal), DEBUG (on failure)"
+  destinations:
+    - "build_report_*.md (human-readable)"
+    - "agents/BuildMaster-Shizuku/memory/*.md (learning)"
+    - "/tmp/build_*.log (raw gradle output, ephemeral)"
+  retention:
+    - "Reports: 30 days"
+    - "Memory logs: Permanent (Git history)"
+    - "Artifacts (APK, mapping): 6 months"
+
+error_handling:
+  oom:
+    condition: "java.lang.OutOfMemoryError"
+    recovery: "Reduce Xmx to 1100m, retry"
+    escalation: "If persistent, escalate to Ops"
+  timeout:
+    condition: "Build hangs >15 min"
+    recovery: "Kill daemon (./gradlew --stop), retry"
+    escalation: "Investigate CMake deadlock"
+  signing_failure:
+    condition: "jarsigner exit code != 0"
+    recovery: "Verify keystore path + password"
+    escalation: "Escalate to SecOps"
+
+versioning:
+  git_tags:
+    format: "v13.6.0-build-{TIMESTAMP}"
+    example: "v13.6.0-build-20260702_090000"
+  commit_message:
+    format: "build(Shizuku): {ACTION} — {SIZE} | {DURATION}\nAgent: BuildMaster-Shizuku\nStatus: {SUCCESS|FAILED}"
+
+approval_gate: "None (autonomous agent, post-build verification)"
+
+notes:
+  - "Agent designed for 2-core, 2GB RAM environment (e2b.local baseline)"
+  - "All timings are wall-clock, not CPU time"
+  - "ProGuard mapping retention is critical for crash debugging"
+  - "Incremental builds reduce typical cycle to 15–25s (from 185s clean)"
+  - "No root required; all operations standard user permissions"
+  - "CMake parallelism limited by NDK design (sequential C++ compile)"
+  - "Swap usage should be zero; if OOM, investigate Gradle daemon lifecycle"
+  - "Reproducibility: All source + gradle.properties + keystore must be unchanged"
+
+---
+# Deployment Checklist
+
+- [ ] Extract Shizuku 13.6.0 source to /workspace/
+- [ ] Validate Android SDK 36 + NDK 29 installed
+- [ ] Verify Java 21 in PATH
+- [ ] Copy gradle.properties optimization template
+- [ ] Set ANDROID_SDK_ROOT, ANDROID_NDK_ROOT env vars
+- [ ] Test debug build (should complete <120s)
+- [ ] Deploy agent_workflow.sh to AIOS agents/
+- [ ] Initialize GitHub repo with AIOS structure
+- [ ] First release build + metrics baseline
+- [ ] Populate memory system (ai_brain, build_baseline.md)
+- [ ] Validate inter-agent communication paths
+
+---
+Generated: 2026-07-02 08:00:00 UTC
+Agent Status: READY FOR DEPLOYMENT
