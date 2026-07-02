@@ -1,0 +1,32 @@
+[0;32m✅ Agent Bot Starter v1.0[0m
+[0;34mℹ️  Validating environment...[0m
+[0;32m✅ Python: Python 3.13.13[0m
+[0;32m✅ Repository: /home/user/Apks[0m
+[0;32m✅ Environment validated[0m
+[0;34mℹ️  Starting agent bot...[0m
+[0;34mℹ️    Agent ID: 101[0m
+[0;34mℹ️    Role: builder[0m
+[0;34mℹ️    Repository: /home/user/Apks[0m
+[0;34mℹ️    Poll Interval: 60 seconds[0m
+[0;34mℹ️    Mode: once[0m
+[0;32m✅ Running single poll cycle[0m
+/home/user/Apks/Agents/agent_bot.py:821: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  print(f"\n📍 Poll cycle at {datetime.utcnow().isoformat()}Z")
+
+======================================================================
+🤖 AIOS Agent Bot Starting
+======================================================================
+Agent ID: 101
+Role: builder
+Repository: /home/user/Apks
+Poll Interval: 60s
+======================================================================
+
+❌ ERROR: GITHUB_TOKEN not set
+
+📍 Poll cycle at 2026-07-02T08:55:11.357700Z
+📡 Syncing repository...
+⚠️  Sync warning: Git error: error: cannot pull with rebase: You have unstaged changes.
+error: Please commit or stash them.
+
+⚠️  Sync failed, skipping cycle
